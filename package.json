@@ -1,6 +1,6 @@
 {
   "name": "arini",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha",
   "description": "The way web-apps are supposed to be made.",
   "main": "index.js",
   "scripts": {

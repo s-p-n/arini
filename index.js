@@ -1,1 +1,1 @@
-module.exports = require("./lib/ScopeParser.js");
+module.exports = require("./lib/grammar/grammar.js");
