@@ -1,21 +1,22 @@
 const Man = require('man-api');
 const fs = require('fs');
+const path = require('path');
 const dateformat = require('dateformat');
-let out = fs.createWriteStream('scope.1');
+let out = fs.createWriteStream(path.join(__dirname, 'arini.1'));
 
 let man = new Man();
 man.on('data', (str) => {
 	out.write(str);
 });
-
-let version = require("../package.json").version;
+let packageJson = require('../package.json');
+let version = packageJson.version;
 let date = dateformat('yyyy-mm-dd')
-man.header('scope', 1, date, version, "GNU")
-	.name('scope', 'Transpile or run scope programs.').
+man.header('arini', 1, date, version, "User Commands")
+	.name('arini', 'Transpile or run arini programs.').
 
 section('Synopsis').
 	paragraph().
-		bold("scope").
+		bold("arini").
 		write(" [").
 		italic("options").
 		write("]").
@@ -33,10 +34,10 @@ section('Synopsis').
 	subSection("outfile").
 		write("The name of the file to transpile to- optional, and only useful when not running.").
 	subSection("arguments").
-		write("Arguments passed to the scope program, seperated by spaces.").
+		write("Arguments passed to the arini program, seperated by spaces.").
 
 section('Description').
-	write("This transpiler is intended to convert Scope source code into executable JavaScript programs." +
+	write("This transpiler is intended to convert arini source code into executable JavaScript programs." +
 		" For more information, the section ").
 	italic("SEE ALSO").
 	write(" is located at the bottom of this document.").
@@ -68,7 +69,7 @@ section('Exit Status').
 	subSection("66").
 		write("Input file cannot be opened, but not due to permission. Perhaps it doesn't exist?").
 	subSection("70").
-		write("Parser, Grammar, (syntax error), or anything relating to the scope transpiler. " +
+		write("Parser, Grammar, (syntax error), or anything relating to the arini transpiler. " +
 			"This code is generally a result of a syntax error, but could be a bug in the transpiler.").
 	subSection("73").
 		write("Can't create user output file- but not due to permission. " +
@@ -80,7 +81,7 @@ section('Versions').
 	write(`This Version: ${version}`).
 
 section('Conforming To').
-	write("This software strives to deliver a valid interpretation of the Scope programming language " +
+	write("This software strives to deliver a valid interpretation of the arini programming language " +
 		"version 1 specification. However, this software is still under active development and does have " +
 		"known incompatibilities with the specification. Any incompatibilities are considerred bugs, and " +
 		"there is no guarentee that any programs which compile currently will compile under later versions " +
@@ -95,12 +96,12 @@ section('Conforming To').
 
 section('Bugs').
 	paragraph().
-		write("Report bugs to: https://github.com/s-p-n/scope/issues").
+		write(`Report bugs to: ${packageJson.bugs.url}`).
 
 section('See Also').
 	subSection("Github").
-		write("https://github.com/s-p-n/scope").
-	subSection("Wiki").
-		write("https://github.com/s-p-n/scope/wiki").
+		write(packageJson.repository.url).
+	subSection("Homepage").
+		write(packageJson.homepage).
 	subSection("npm").
-		write("https://www.npmjs.com/package/scope-lang");
+		write("https://www.npmjs.com/package/" + packageJson.name);
