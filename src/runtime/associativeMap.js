@@ -13,6 +13,7 @@ let handler = Object.freeze({
 	},
 
 	has (target, prop) {
+		console.log("has:", prop);
 		return target.has(prop);
 	},
 

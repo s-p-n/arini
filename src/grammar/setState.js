@@ -82,7 +82,10 @@ module.exports = function setState (parser, runtime={}) {
 
 	parser.eval = function () {
 		let code = `[${Object.keys(runtime).join(',')}]=[${Object.values(runtime).join(',')}];`;
-		code += parser.yy.expressions.join(";");
+		console.log(parser.yy.scope);
+		let processedArini = parser.yy.scope.toJS();
+		code += processedArini;
+		console.log(processedArini);
 		code = parseMacros(code);
 		return requireFromString(code, "shell");
 	}
@@ -114,7 +117,4 @@ Token: ${hash.token}`);
 			process.exit();
 		}
 	}
-
-	parser.yy.expressions = [];
-	parser.yy.expressions.parent = null;
 }

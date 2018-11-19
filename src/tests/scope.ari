@@ -1,0 +1,49 @@
+let test1 = {
+	let say = (what) {
+		console.log(what);
+	};
+
+	let greet = (who) {
+		say("hello " + who);	
+	};
+
+	let adieu = (who) {
+		say("farewell " + who);
+	};
+
+	greet("world");
+	adieu("world");
+};
+
+let test2 = {
+	let say = (what) {
+		console.log(what);
+	};
+	let do = (f, arg) {
+		f(arg);
+	};
+	do(say, "do say");
+};
+
+let test3 = {
+	let Tag = {
+		public tag;
+		public create = (attr) {
+			tag = <div ...attr />;
+		};
+	};
+	let attr = [
+		id: "test3",
+		class: "test",
+		onclick: {
+			console.log("clicked");
+		}
+	];
+	let t = Tag();
+	t.create(attr);
+	t.tag.attributes.onclick();
+};
+
+test1();
+test2();
+test3();

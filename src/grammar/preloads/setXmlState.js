@@ -9,7 +9,7 @@ module.exports = function setXmlState (parser) {
 		nest (child) {
 			this.children.push(child);
 		}
-		toScope () {
+		toJS () {
 			let result = `scope.xml("${this.tagName}",{${this.attributes}}`;
 			if (this.children.length === 0) {
 				return result + ")";
@@ -21,7 +21,7 @@ module.exports = function setXmlState (parser) {
 					result += ",";
 				}
 				if (child instanceof Tag) {
-					result += child.toScope();
+					result += child.toJS();
 				} else {
 					result += child;
 				}

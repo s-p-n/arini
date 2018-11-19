@@ -23,17 +23,30 @@
 %%
 
 \s+                                          {/* skip whitespace */}
+"("\s*")"\s*"{"                              {
+											 	yy.scope.beginParen();
+											 	yy.scope.endParen(true);
+												return '(){';
+											 }
 "("                                          {
-												if (/ /i) {
-
-												}
 												this.pushState('paren');
-												this.pushState('declLeft');
+												yy.scope.beginParen();
 												return "(";
 											 }
-<paren>")\s*{"                               {this.popState();return "){"}
-<paren>")"                                   {this.popState();return ")";}
-<paren>","                                   {this.pushState('declLeft');return ",";}
+"{"                                          {return "{";}
+"}"                                          {return "}";}
+<paren>")"\s*"{"                             {
+												this.popState();
+												yy.scope.endParen(true);
+												return "){";
+											 }
+<paren>")"                                   {
+												this.popState();
+												yy.scope.endParen(false);
+												return ")";
+											 }
+<paren>'='|':'|'becomes'                     {return "BECOMES";}
+<paren>","                                   {return ",";}
 '...'                                        {return '...';}
 
 '`'				                             {this.pushState('inBacktick'); return 'BT_OPEN';}
@@ -171,8 +184,6 @@ r(?:\'\'\'|\"\"\"|[/"'@~%`])      		 	%{
 ","                                          {return ",";}
 "="                                          {return "BECOMES";}
 ":"                                          {return "BECOMES";}
-"{"                                          {return "{";}
-"}"                                          {return "}";}
 [a-z][a-z0-9\-\_\$]*                         {
                                                  for (let [search, result] of yy.namedTokens) {
                                                  	if (search.test(yytext)) {

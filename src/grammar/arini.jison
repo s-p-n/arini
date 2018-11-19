@@ -10,7 +10,9 @@
 %left '.'
 
 %right UMINUS INCREMENT DECREMENT RANDOM '...'
-%right '(' ')' BT_EXPR_OPEN BT_EXPR_CLOSE '[' ']' '){' '{' '}'
+%right BT_EXPR_OPEN BT_EXPR_CLOSE '{' '}'
+%right '[' ']'
+%right '(' ')' '){'
 %right ','
 %right ';'
 
@@ -123,6 +125,8 @@ binaryExpression
 		{$$ = `scope.in(${$a}, ${$b})`;}
 	| expr[a] HAS expr[b]
 		{$$ = `scope.has(${$a}, ${$b})`;}
+	| property BECOMES expr
+		{$$ = `scope.set(scope._scoping,"${$property}",${$expr})`;}
 	| id BECOMES expr
 		{$$ = `scope.set(${$id.parent},${$id.prop},${$expr})`;}
 	| expr[a] '[' ']' BECOMES expr[b]
@@ -145,13 +149,13 @@ controlCode
 	: /* empty */
 		{$$ = "";}
 	| controlCode expr ';'
-		{yy.expressions.push($expr);}
+		{yy.scope.pushStmt($expr);}
 	;
 
 decStatements
 	: /* empty */
 	| decStatements declaration ';'
-		{yy.expressions.push($declaration);}
+		{yy.scope.pushStmt($declaration);}
 	;
 
 declaration
@@ -195,20 +199,20 @@ expr
 		{$$ = $literal;}
 	| id
 		{$$ = $id.value;}
+	| property
+		{$$ = `scope.id["${$property}"]`;}
 	| invokeExpr
 		{$$ = $invokeExpr;}
 	| binaryExpression
 		{$$ = $binaryExpression;}
-	| '(' expr ')'
-		{$$ = '(' + $expr + ')';}
+	//| '(' expr ')'
+	//	{$$ = '(' + $expr + ')';}
 	| unaryExpression
 		{$$ = $unaryExpression;}
 	;
 
 id
-	: property
-		{$$ = {parent: "scope._scoping", prop: `"${$property}"`, value: `scope.id["${$property}"]`};}
-	| expr '.' PROPERTY
+	: expr '.' PROPERTY
 		{$$ = {parent: $expr, prop: `"${$PROPERTY}"`, value:`${$expr}["${$PROPERTY}"]`};}
 	| expr '.' JSPROPERTY
 		{$$ = {parent: $expr, prop: `"${$JSPROPERTY}"`, value:`${$expr}.${$JSPROPERTY}`};}
@@ -246,14 +250,14 @@ literal
 	| string
 		{$$ = $string;}
 	| tag
-		{$$ = $tag.toScope();}
+		{$$ = $tag.toJS();}
 	| UNDEFINED
 		{$$ = undefined;}
 	;
 
 program
 	: codeBlock EOF
-		{return yy.expressions;}
+		{return yy.scope.expressions;}
 	;
 
 property
@@ -291,33 +295,74 @@ regexBody
 			$$ = $regexBody + $REGEX_BODY.replace(/\"/g, '\\"').replace(/\n/g,'\\n');
 		%}
 	;
-
-scope
-	: scopeStart codeBlock '}'
-	;
 /*
-scopeArgument
-	: ARGUMENT BECOMES expression
-	| property
-	;
-
-scopeArguments
-	: scopeArgumentsList
-	;
-
-scopeArgumentsList
-	: scopeArgument
-	| scopeArguments ',' scopeArgument
-	;
-
 scopeArgumentSpread
 	: '...' property
 	;
 */
+
+scope
+	: scopeStart codeBlock '}'
+		%{
+			$$ = $scopeStart + yy.scope.toJS() + '})';
+			yy.scope.end();
+		%}
+	;
+
 scopeStart
-	: '{'
-	| '(' '){'
-	| '(' decProperty ')'
+	: '(' scopeArguments '){'
+		%{
+			$$ = (function () {
+				let args = $scopeArguments;
+				yy.scope.begin();
+				return `scope.createScope(function(...args){${args}`;
+			}());
+		%}
+	| '(){'
+		%{
+			yy.scope.begin();
+			$$ = 'scope.createScope(function(){';
+		%}
+	| '{'
+		%{
+			yy.scope.begin();
+			$$ = 'scope.createScope(function(){';
+		%}
+	;
+
+scopeArguments
+	: property BECOMES expr
+		{
+			$$ = yy.scope.pushArg(`"${$property}"`, $expr);
+		}
+	| property
+		{
+			$$ = yy.scope.pushArg(`"${$property}"`);
+		}
+	| '[' scopeArgumentsList ']' BECOMES expr
+		{
+			$$ = yy.scope.pushArg(`[${$scopeArgumentsList}]`, $expr);
+		}
+	| '[' scopeArgumentsList ']'
+		{
+			$$ = yy.scope.pushArg(`[${$scopeArgumentsList}]`);
+		}
+	| scopeArguments[a] ',' scopeArguments[b]
+		{$$ = $b;}
+	;
+
+scopeArgumentsList
+	: scopeArgumentsListAtom
+		{$$ = $scopeArgumentsListAtom}
+	| scopeArgumentsList ',' scopeArgumentsListAtom
+		{$$ = $scopeArgumentsList + ',' + $scopeArgumentsListAtom}
+	;
+
+scopeArgumentsListAtom
+	: property
+		{$$ = `"${$property}"`;}
+	| '[' scopeArgumentsList ']'
+		{$$ = '[' + $scopeArgumentsList + ']';}
 	;
 
 string
@@ -374,7 +419,7 @@ tagBlock
 tagBlockEnd
 	: "<" XML_BLOCK_END XML_CLOSE_ID XML_BLOCK_CLOSE
 		{
-			yy.expressions = yy.expressions.parent;
+			yy.scope.end();
 			$$ = $XML_CLOSE_ID;
 		}
 	;
@@ -383,17 +428,16 @@ tagBlockStart
 	: "<" XML_OPEN_ID attributeList XML_BLOCK_START
 		{
 			$$ = (function () {
-				let parent = yy.expressions;
-				yy.expressions = [];
-				yy.expressions.parent = parent;
-				return new yy.xml.Tag($XML_OPEN_ID, $attributeList, yy.expressions, parent);
+				let parent = yy.scope;
+				yy.scope.begin();
+				return new yy.xml.Tag($XML_OPEN_ID, $attributeList, yy.scope.expressions, parent);
 			}());
 		}
 	;
 
 tagShort
 	: "<" XML_OPEN_ID attributeList XML_SHORT_CLOSE
-		{$$ = (new yy.xml.Tag($XML_OPEN_ID, $attributeList, [], yy.expressions));}
+		{$$ = (new yy.xml.Tag($XML_OPEN_ID, $attributeList, [], yy.scope.expressions));}
 	;
 
 unaryExpression

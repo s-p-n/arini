@@ -8,39 +8,54 @@ if (typeof window !== "undefined") {
 const Node = <include file="./Node.js"/>;
 const TextNode = <include file="./TextNode.js"/>;
 const associativeMap = <include file="./associativeMap.js"/>;
+const priv = new WeakMap();
 class Scope {
 	constructor () {
 		const self = this;
 		self._scoping = {
-			let: this.map(),
-			private: this.map(),
-			protected: this.map(),
-			public: this.map(),
+			let: self.map(),
+			private: self.map(),
+			protected: self.map(),
+			public: self.map(),
 			parent: null
 		};
 
+		function getId(prop, ctx) {
+			for (let slot in ctx) {
+				if (slot === "parent" || typeof ctx[slot].has !== "function") {
+					continue;
+				}
+				if (ctx[slot].has(prop)) {
+					return ctx[slot][prop];
+				}
+			}
+			if (ctx.parent === null) {
+				return global[prop];
+			}
+			return getId(prop, ctx.parent);
+		}
+
+		function setId(prop, value, ctx) {
+			for (let slot in ctx) {
+				if (slot === "parent" || typeof ctx[slot].has !== "function") {
+					continue;
+				}
+				if (ctx[slot].has(prop)) {
+					return ctx[slot][prop] = value;
+				}
+			}
+			if (ctx.parent === null) {
+				return global[prop] = value;
+			}
+			return setId(prop, value, ctx.parent);
+		}
+
 		self.id = new Proxy(self._scoping, {
 			get: function get (target, prop, receiver) {
-				let ctx = self._scoping;
-				for (let slot in ctx) {
-					if (ctx[slot] === null) {
-						return global[prop];
-					}
-					if (ctx[slot].has(prop)) {
-						return ctx[slot][prop];
-					}
-				}
+				return getId(prop, self._scoping);
 			},
 			set: function set (target, prop, val, receiver) {
-				let ctx = self._scoping;
-				for (let slot in ctx) {
-					if (ctx[slot] === null) {
-						return global[prop] = val;
-					}
-					if (ctx[slot].has(prop)) {
-						return ctx[slot][prop] = val;
-					}
-				}
+				return setId(prop, val, self._scoping);
 			}
 		})
 	}
@@ -89,9 +104,33 @@ class Scope {
 		return expr;
 	}
 
+	createScope (f) {
+		const self = this;
+		let result = function Scope(...args) {
+			const thisArg = this;
+			return self.invokeExpression({
+				function: f,
+				arguments: args,
+				context: thisArg,
+				isExtension: f._beingUsed
+			});
+		};
+		const define = function (prop, val) {
+			Object.defineProperty(result, prop, {
+				get: () => f[prop],
+				set: newVal => f[prop] = newVal
+			});
+			return result[prop] = val;
+		};
+		define("_isScope", true);
+		define("_parent", self._scoping);
+		define("_beingUsed", false);
+		define("_originalFunction", f);
+		return result;
+	}
+
 	declare (slot, ...sets) {
 		const self = this;
-		let ctx;
 		let slots = ['let', 'private', 'protected', 'public'];
 		let results = [];
 		for (let [name, value] of sets) {
@@ -141,6 +180,51 @@ class Scope {
 
 	in (a, b) {
 		return a in b;
+	}
+
+	invokeExpression(config = {
+		function: function () {},
+		arguments: [],
+		context: this,
+		isExtension: false
+	}) {
+		const self = this;
+		let scoping,result;
+
+		if (!config.function._isScope) {
+			return config.function.apply(config.context, config.arguments);
+		}
+
+		scoping = self._scoping;
+		
+		if (config.function === undefined) {
+			throw new Error(`Call to undefined scope`);
+		}
+		self._scoping = {
+			let: self.map(),
+			private: self.map(),
+			protected: self.map(),
+			public: self.map(),
+			parent: config.function._parent
+		};
+		
+		result = config.function(...config.arguments);
+		//console.log("scoping:");
+		//console.log(self._scoping);
+
+		if (result === undefined) {
+			if (config.isExtension === true) {
+				result = self.map(
+					["public", self._scoping.public],
+					["protected", self._scoping.protected]
+				);
+			} else {
+				result = self._scoping.public;
+			}
+		}
+		
+		self._scoping = scoping;
+		return result;
 	}
 
 	map (items) {
@@ -215,8 +299,15 @@ class Scope {
 
 	set (obj, prop, val) {
 		const self = this;
-		//console.log(`set(${obj.toString()}, ${prop}, ${val})`);
 		
+		let slots = [
+			'let',
+			'private',
+			'protected',
+			'public',
+			'parent'
+		];
+
 		if (obj === global) {
 			if (prop in global) {
 				return obj[prop] = val;
@@ -224,16 +315,18 @@ class Scope {
 				throw `${prop} is not defined.`;
 			}
 		}
-		if (obj === self._scoping) {
-			//console.log(`looking up ${prop}..`)
-			for (let slot in obj) {
-				if (obj[slot] === null) {
-					return self.set(global, prop, val);
-				}
-				if (obj[slot].has(prop)) {
-					//console.log(`found [${slot}: ${prop}]`)
-					return self.set(obj[slot], prop, val);
-				}
+		for (let slot of slots) {
+			if (!obj.hasOwnProperty(slot)) {
+				break;
+			}
+			if (obj[slot] === null) {
+				return self.set(global, prop, val);
+			}
+			if (slot === "parent") {
+				return self.set(obj.parent, prop, val);
+			}
+			if (obj[slot].has(prop)) {
+				return obj[slot][prop] = val;
 			}
 		}
 		return obj[prop] = val;
