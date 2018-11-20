@@ -150,6 +150,8 @@ controlCode
 		{$$ = "";}
 	| controlCode expr ';'
 		{yy.scope.pushStmt($expr);}
+	| controlCode stmt
+		{yy.scope.pushStmt($stmt);}
 	;
 
 decStatements
@@ -225,6 +227,8 @@ id
 invokeArgs
 	: expr
 		{$$ = $expr;}
+	| '...' expr
+		{$$ = "..." + $expr;}
 	| invokeArgs ',' expr
 		{$$ = $invokeArgs + "," + $expr;}
 	;
@@ -295,11 +299,17 @@ regexBody
 			$$ = $regexBody + $REGEX_BODY.replace(/\"/g, '\\"').replace(/\n/g,'\\n');
 		%}
 	;
-/*
+
+returnStmt
+	: RETURN expr ';'
+		{$$ = `return ${$expr};`;}
+	;
+
 scopeArgumentSpread
 	: '...' property
+		{$$ = $property;}
 	;
-*/
+
 
 scope
 	: scopeStart codeBlock '}'
@@ -312,10 +322,33 @@ scope
 scopeStart
 	: '(' scopeArguments '){'
 		%{
+			yy.scope.endParen(true);
 			$$ = (function () {
-				let args = $scopeArguments;
+				let args = yy.scope.argsDecl;
 				yy.scope.begin();
 				return `scope.createScope(function(...args){${args}`;
+			}());
+		%}
+	| '(' scopeArguments ',' scopeArgumentSpread '){'
+		%{
+			yy.scope.endParen(true);
+			$$ = (function () {
+				let args = yy.scope.argsDecl;
+				let argsLength = yy.scope.argsLength;
+				let spreadProp = $scopeArgumentSpread;
+				let spread = `scope.declare("let", ["${spreadProp}",args.slice(${argsLength})]);`;
+				yy.scope.begin();
+				return `scope.createScope(function(...args){${args}${spread}`;
+			}());
+		%}
+	| '(' scopeArgumentSpread '){'
+		%{
+			yy.scope.endParen(true);
+			$$ = (function () {
+				let spreadProp = $scopeArgumentSpread;
+				let spread = `scope.declare("let", ["${spreadProp}",args]);`;
+				yy.scope.begin();
+				return `scope.createScope(function(...args){${spread}`;
 			}());
 		%}
 	| '(){'
@@ -348,7 +381,7 @@ scopeArguments
 			$$ = yy.scope.pushArg(`[${$scopeArgumentsList}]`);
 		}
 	| scopeArguments[a] ',' scopeArguments[b]
-		{$$ = $b;}
+		{$$ = yy.scope.args;}
 	;
 
 scopeArgumentsList
@@ -363,6 +396,11 @@ scopeArgumentsListAtom
 		{$$ = `"${$property}"`;}
 	| '[' scopeArgumentsList ']'
 		{$$ = '[' + $scopeArgumentsList + ']';}
+	;
+
+stmt
+	: returnStmt
+		{$$ = $returnStmt}
 	;
 
 string

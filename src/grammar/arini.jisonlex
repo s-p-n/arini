@@ -37,7 +37,6 @@
 "}"                                          {return "}";}
 <paren>")"\s*"{"                             {
 												this.popState();
-												yy.scope.endParen(true);
 												return "){";
 											 }
 <paren>")"                                   {

@@ -28,6 +28,7 @@ let namedTokens = [
 	"OR",
 	"PLUS",
 	"RANDOM",
+	"RETURN",
 	"TIMES",
 	"TO",
 	"UNDEFINED",

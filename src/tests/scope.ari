@@ -16,13 +16,13 @@ let test1 = {
 };
 
 let test2 = {
-	let say = (what) {
-		console.log(what);
+	let say = (...what) {
+		console.log(...what);
 	};
-	let do = (f, arg) {
-		f(arg);
+	let do = (f, ...args) {
+		f(...args);
 	};
-	do(say, "do say");
+	do(say, "do say,", "young chap!");
 };
 
 let test3 = {
@@ -44,6 +44,14 @@ let test3 = {
 	t.tag.attributes.onclick();
 };
 
+let test4 = {
+	let foo = (f, ...rest) {
+		f(...rest);
+	};
+	foo(console.log,2,3,4,5);
+};
+
 test1();
 test2();
 test3();
+test4();
