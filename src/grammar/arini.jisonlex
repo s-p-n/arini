@@ -17,6 +17,7 @@
 %s declBracket
 %s declRight
 %s exprBracket
+%s ifParen
 %s paren
 %s formalArguments
 
@@ -28,13 +29,16 @@
 											 	yy.scope.endParen(true);
 												return '(){';
 											 }
+"if"\s*"("                                   {
+												this.pushState('ifParen');
+												return "IF(";
+											 }
+<ifParen>')'                                 {this.popState();return ')';}
 "("                                          {
 												this.pushState('paren');
 												yy.scope.beginParen();
 												return "(";
 											 }
-"{"                                          {return "{";}
-"}"                                          {return "}";}
 <paren>")"\s*"{"                             {
 												this.popState();
 												return "){";
@@ -163,6 +167,8 @@ r(?:\'\'\'|\"\"\"|[/"'@~%`])      		 	%{
                                                 })();
                                             }
 
+"{"                                          {return "{";}
+"}"                                          {return "}";}
 ".."                                         {return "TO";}
 \"(\\\"|[^\"])*\"                            {return "QSTRING";}
 \'(\\\'|[^\'])*\'                            {return "ASTRING";}

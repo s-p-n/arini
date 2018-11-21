@@ -224,6 +224,41 @@ id
 		{$$ = {parent: $expr1, prop: $expr2, value:`${$expr1}[${$expr2}]`};}
 	;
 
+ifStmt
+	: ifStmtLineStart expr ';'
+		%{
+			$$ = (function () {
+				let result = $ifStmtLineStart;
+				result += `{
+					let expr = ${$expr};
+					if (typeof expr === "function") {
+						expr();
+					}
+				}`;
+				return result;
+			}());
+		%}
+	| ifStmt ifStmtElse
+		{$$ = $ifStmt + $ifStmtElse;}
+	;
+
+ifStmtElse
+	: ifStmtElseLineStart expr ';'
+		{$$ = $ifStmtElseLineStart + $expr + ';'}
+	;
+
+ifStmtElseLineStart
+	: ELSE 
+		{$$ = 'else ';}
+	| ELSE ifStmtLineStart
+		{$$ = `else ${$ifStmtLineStart}`;}
+	;
+
+ifStmtLineStart
+	: 'IF(' expr ')'
+		{$$ = `if(${$expr})`;}
+	;
+
 invokeArgs
 	: expr
 		{$$ = $expr;}
@@ -400,7 +435,9 @@ scopeArgumentsListAtom
 
 stmt
 	: returnStmt
-		{$$ = $returnStmt}
+		{$$ = $returnStmt;}
+	| ifStmt
+		{$$ = $ifStmt;}
 	;
 
 string
