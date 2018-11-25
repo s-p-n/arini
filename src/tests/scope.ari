@@ -52,8 +52,8 @@ let test4 = {
 };
 
 let test5 = {
-	let print becomes console.log;
-	let foo becomes random from 1 to 10;
+	let print become console.log;
+	let foo become random from 1 to 10;
 	if (foo > 7) {
 		print(`${foo} is greater than 7.`);
 	} else if(foo > 5) {
@@ -65,8 +65,27 @@ let test5 = {
 	};
 };
 
+let test6 = {
+	let search = (what) {
+		return (subject) {
+			if (scope.getType(subject) is "string") {
+				console.log(JSON.stringify(subject), "is a string");
+				if(true) {
+					return subject.indexOf(what) isnt -1;
+				};
+			};
+			console.log(JSON.stringify(subject), "is not a string");
+			return subject has what;
+		};
+	};
+	let foo becomes search("Hell") from "Hello, World";
+	let bar becomes search ("Hell") from ["Hello", "World"];
+	console.log(foo, bar);
+};
+
 test1();
 test2();
 test3();
 test4();
 test5();
+test6();

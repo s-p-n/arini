@@ -66,27 +66,6 @@ class Scope {
 
 	array (arr=[]) {
 		const self = this;
-		/*Object.defineProperty(arr, "random", {
-			value(n=1) {
-				let result;
-				let keys = Object.keys(this);
-				n = parseInt(n);
-				if (n === 1) {
-					return this[keys[Math.floor(Math.random() * keys.length)]];
-				}
-
-				result = [];
-				for (let i = 0; i < n && keys.length > 0; i += 1) {
-					let key = keys.splice(Math.floor(Math.random() * keys.length),1)[0];
-					result.push(this[key]);
-				}
-				return self.array(result);
-			},
-			configurable: false,
-			writable: false,
-			enumerable: false
-		});
-		*/
 		return arr;
 	}
 
@@ -104,10 +83,10 @@ class Scope {
 		return expr;
 	}
 
-	createScope (f) {
+	createScope (f, hasReturn) {
 		const self = this;
 		let result = function Scope(...args) {
-			const thisArg = this;
+			const thisArg = f;
 			return self.invokeExpression({
 				function: f,
 				arguments: args,
@@ -116,17 +95,37 @@ class Scope {
 			});
 		};
 		const define = function (prop, val) {
-			Object.defineProperty(result, prop, {
-				get: () => f[prop],
-				set: newVal => f[prop] = newVal
-			});
+			self.createReference(result, prop, f);
 			return result[prop] = val;
 		};
+		define("_hasReturn", hasReturn);
 		define("_isScope", true);
 		define("_parent", self._scoping);
 		define("_beingUsed", false);
 		define("_originalFunction", f);
 		return result;
+	}
+
+	createUnpacker (f, supportedTypes=["array", "object", "map", "string"]) {
+		const self = this;
+		let result = function Unpackable(list=[], ...args) {
+			return f.apply(list, args);
+		}
+		const define = function (prop, val) {
+			self.createReference(result, prop, f);
+			return result[prop] = val;
+		};
+		define("_isUnpackable", true);
+		define("_supportedTypes", supportedTypes);
+		define("_originalFunction", f);
+		return result;
+	}
+
+	createReference (targetObj, targetProp, receiverObj, receiverProp=targetProp) {
+		Object.defineProperty(receiverObj, receiverProp, {
+			get: () => targetObj[targetProp],
+			set: newVal => targetObj[targetProp] = newVal
+		});
 	}
 
 	declare (slot, ...sets) {
@@ -178,6 +177,16 @@ class Scope {
 		return Object.values(a).some(val => Object.is(val, b));
 	}
 
+	getType (expr) {
+		if (expr instanceof Array) {
+			return "array";
+		}
+		if (expr instanceof Map) {
+			return "map";
+		}
+		return typeof expr;
+	}
+
 	in (a, b) {
 		return a in b;
 	}
@@ -208,7 +217,7 @@ class Scope {
 			parent: config.function._parent
 		};
 		
-		result = config.function(...config.arguments);
+		result = config.function.apply(config.context, config.arguments);
 		//console.log("scoping:");
 		//console.log(self._scoping);
 
@@ -232,28 +241,31 @@ class Scope {
 		return associativeMap(items);
 	}
 
-	random (list=[], n=1) {
+	random (n=1) {
 		const self = this;
-		let result;
-		let isStr = false;
-		let keys = Object.keys(list);
-		if (typeof list === "string") {
-			isStr = true;
-		}
 		n = parseInt(n);
-		if (n === 1) {
-			return list[keys[Math.floor(Math.random() * keys.length)]];
-		}
+		return self.createUnpacker(function () {
+			let list = this;
+			let result;
+			let isStr = false;
+			let keys = Object.keys(list);
+			if (typeof list === "string") {
+				isStr = true;
+			}
+			if (n === 1) {
+				return list[keys[Math.floor(Math.random() * keys.length)]];
+			}
 
-		result = [];
-		for (let i = 0; i < n && keys.length > 0; i += 1) {
-			let key = keys.splice(Math.floor(Math.random() * keys.length),1)[0];
-			result.push(list[key]);
-		}
-		if (!isStr) {
-			return self.array(result);
-		}
-		return result.join('');
+			result = [];
+			for (let i = 0; i < n && keys.length > 0; i += 1) {
+				let key = keys.splice(Math.floor(Math.random() * keys.length),1)[0];
+				result.push(list[key]);
+			}
+			if (!isStr) {
+				return self.array(result);
+			}
+			return result.join('');
+		});
 	}
 
 	range (start=0, end=0, inc=1) {
@@ -330,6 +342,27 @@ class Scope {
 			}
 		}
 		return obj[prop] = val;
+	}
+
+	unpack (list=[]) {
+		const self = this;
+		let result = Object.create(null);
+		result.using = function (unpackable) {
+			const type = self.getType(unpackable);
+			if (type === "string" || 
+				(type === "number" &&
+					parseInt(unpackable) === unpackable)) {
+				return list[unpackable];
+			}
+			if (type === "unpackable" && 
+				unpackable._supportedTypes.includes(scope.getType(list))) {
+				return unpackable(list);
+			}
+			if (type === "scope" || type === "function") {
+				return unpackable(list);
+			}
+		}
+		return result;
 	}
 
 	wait (seconds) {

@@ -92,7 +92,7 @@ attributeList
 		}
 	;
 
-binaryExpression
+binaryExpr
 	: expr[a] LT expr[b]
 		{$$ = `(${$a}<${$b})`;}
 	| expr[a] LTEQ expr[b]
@@ -135,10 +135,10 @@ binaryExpression
 		{$$ = `scope.range(${$a},${$b},${$c})`;}
 	| expr[a] TO expr[b]
 		{$$ = `scope.range(${$a},${$b})`;}
-	| randExpr FROM expr
-		{$$ = `scope.random(${$expr}${$randExpr}`;}
+	| unpackExpr FROM expr
+		{$$ = `scope.unpack(${$expr}).using(${$unpackExpr})`;}
 	| expr[a] FROM expr[b]
-		{$$ = `${$b}[${$a}]`;}
+		{$$ = `scope.unpack(${$b}).using(${$a})`;}
 	;
 
 codeBlock
@@ -205,12 +205,12 @@ expr
 		{$$ = `scope.id["${$property}"]`;}
 	| invokeExpr
 		{$$ = $invokeExpr;}
-	| binaryExpression
-		{$$ = $binaryExpression;}
+	| binaryExpr
+		{$$ = $binaryExpr;}
 	//| '(' expr ')'
 	//	{$$ = '(' + $expr + ')';}
-	| unaryExpression
-		{$$ = $unaryExpression;}
+	| unaryExpr
+		{$$ = $unaryExpr;}
 	;
 
 id
@@ -232,7 +232,10 @@ ifStmt
 				result += `{
 					let expr = ${$expr};
 					if (typeof expr === "function") {
-						expr();
+						let result = expr();
+						if (expr._hasReturn) {
+							return result;
+						}
 					}
 				}`;
 				return result + $ifStmtElseIfChain + $ifStmtEnd;
@@ -248,7 +251,10 @@ ifStmtElse
 				result += `{
 					let expr = ${$expr};
 					if (typeof expr === "function") {
-						expr();
+						let result = expr();
+						if (expr._hasReturn) {
+							return result;
+						}
 					}
 				}`;
 				return result;
@@ -264,7 +270,10 @@ ifStmtElseIf
 				result += `{
 					let expr = ${$expr};
 					if (typeof expr === "function") {
-						expr();
+						let result = expr();
+						if (expr._hasReturn) {
+							return result;
+						}
 					}
 				}`;
 				return result;
@@ -340,9 +349,9 @@ property
 
 randExpr
 	: RANDOM
-		{$$ = ')';}
+		{$$ = 'scope.random()';}
 	| RANDOM expr
-		{$$ = `,${$expr})`;}
+		{$$ = `scope.random(${$expr})`;}
 	;
 
 regex
@@ -369,7 +378,10 @@ regexBody
 
 returnStmt
 	: RETURN expr ';'
-		{$$ = `return ${$expr};`;}
+		{
+			yy.scope.hasReturn = true;
+			$$ = `return ${$expr};`;
+		}
 	;
 
 scopeArgumentSpread
@@ -381,7 +393,7 @@ scopeArgumentSpread
 scope
 	: scopeStart codeBlock '}'
 		%{
-			$$ = $scopeStart + yy.scope.toJS() + '})';
+			$$ = $scopeStart + 'this._hasReturn=true;' + yy.scope.toJS() + ';this._hasReturn=false},' + yy.scope.hasReturn + ')';
 			yy.scope.end();
 		%}
 	;
@@ -547,11 +559,16 @@ tagShort
 		{$$ = (new yy.xml.Tag($XML_OPEN_ID, $attributeList, [], yy.scope.expressions));}
 	;
 
-unaryExpression
+unaryExpr
 	: MINUS expr %prec UMINUS
 		{$$ = '-' + $expr}
 	| INCREMENT expr
 		{$$ = '++' + $expr;}
 	| DECREMENT expr
 		{$$ = '--' + $expr;}
+	;
+
+unpackExpr
+	: randExpr
+		{$$ = $randExpr;}
 	;

@@ -10,7 +10,7 @@ let namedTokens = [
 	["is", "EQ"],
 	["isnt", "INEQ"],
 	"AND",
-	["BECOME", "BECOMES"]
+	["BECOME", "BECOMES"],
 	"BECOMES",
 	"BY",
 	"DECREMENT",

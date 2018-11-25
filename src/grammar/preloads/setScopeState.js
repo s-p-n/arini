@@ -19,6 +19,16 @@ module.exports = function setScopeState(parser) {
 			return args.length;
 		}
 
+		get hasReturn () {
+			let self = parser.yy.scope;
+			return priv.get(self).hasReturn || false;
+		}
+
+		set hasReturn (newVal) {
+			let self = parser.yy.scope;
+			return priv.get(self).hasReturn = !!newVal;
+		}
+
 		begin () {
 			let self = parser.yy.scope;
 			console.log("creating new scope");
