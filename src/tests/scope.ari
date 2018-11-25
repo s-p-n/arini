@@ -62,7 +62,7 @@ let test5 = {
 		print(`${foo} is greater than 3.`);
 	} else {
 		print(`${foo} is less than or equal to 3.`);
-	}
+	};
 };
 
 test1();

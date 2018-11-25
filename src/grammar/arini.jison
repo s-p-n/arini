@@ -225,7 +225,7 @@ id
 	;
 
 ifStmt
-	: ifStmtLineStart expr ';'
+	: ifStmtLineStart expr ifStmtElseIfChain ifStmtEnd
 		%{
 			$$ = (function () {
 				let result = $ifStmtLineStart;
@@ -235,23 +235,55 @@ ifStmt
 						expr();
 					}
 				}`;
-				return result;
+				return result + $ifStmtElseIfChain + $ifStmtEnd;
 			}());
 		%}
-	| ifStmt ifStmtElse
-		{$$ = $ifStmt + $ifStmtElse;}
 	;
 
 ifStmtElse
-	: ifStmtElseLineStart expr ';'
-		{$$ = $ifStmtElseLineStart + $expr + ';'}
+	: ELSE expr
+		%{
+			$$ = (function () {
+				let result = `else`;
+				result += `{
+					let expr = ${$expr};
+					if (typeof expr === "function") {
+						expr();
+					}
+				}`;
+				return result;
+			}());
+		%}
 	;
 
-ifStmtElseLineStart
-	: ELSE 
-		{$$ = 'else ';}
-	| ELSE ifStmtLineStart
-		{$$ = `else ${$ifStmtLineStart}`;}
+ifStmtElseIf
+	: ELSE ifStmtLineStart expr
+		%{
+			$$ = (function () {
+				let result = `else ${$ifStmtLineStart}`;
+				result += `{
+					let expr = ${$expr};
+					if (typeof expr === "function") {
+						expr();
+					}
+				}`;
+				return result;
+			}());
+		%}
+	;
+
+ifStmtElseIfChain
+	: /* empty */
+		{$$ = '';}
+	| ifStmtElseIfChain ifStmtElseIf
+		{$$ = $ifStmtElseIfChain + $ifStmtElseIf;}
+	;
+
+ifStmtEnd
+	: ';'
+		{$$ = '';}
+	| ifStmtElse ';'
+		{$$ = $ifStmtElse;}
 	;
 
 ifStmtLineStart
