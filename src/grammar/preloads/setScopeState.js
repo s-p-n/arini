@@ -51,11 +51,14 @@ module.exports = function setScopeState(parser) {
 		endParen (isScopeArg) {
 			let self = parser.yy.scope;
 			let args = [];
+
 			console.log("endParen", isScopeArg);
 			if (isScopeArg) {
 				priv.get(self).args = priv.get(self.argState);
 			}
-			self.argState = self.argState.parent;
+			if (self.argState.parent !== null) {
+				self.argState = self.argState.parent;
+			}
 		}
 
 		end () {

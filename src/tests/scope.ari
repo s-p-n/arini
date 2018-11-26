@@ -74,13 +74,33 @@ let test6 = {
 					return subject.indexOf(what) isnt -1;
 				};
 			};
-			console.log(JSON.stringify(subject), "is not a string");
-			return subject has what;
+
+			if (scope.getType(subject) is "array") {
+				console.log(JSON.stringify(subject), "is an array");
+				return subject.some(search(what));
+			};
+
+			console.log(JSON.stringify(subject), "is not a string or array");
+			return subject is what;
 		};
 	};
-	let foo becomes search("Hell") from "Hello, World";
-	let bar becomes search ("Hell") from ["Hello", "World"];
-	console.log(foo, bar);
+	let arr = ["Hello", "World"];
+	let str = arr.join(", ");
+	let term = "Hell";
+	let regex = XRegExp(term);
+	let aSearch = Array.prototype.some.bind(arr);
+	let sSearch = RegExp.prototype.test.bind(regex);
+
+	// Expect----------------------------------------------->________
+	let foo becomes search(term) from str;					// true
+	let bar becomes search (term) from arr;					// true
+	let baz = arr has term;									// false
+	let qux = arr.some(sSearch);							// true
+	let far = RegExp.prototype.test.bind(regex) from str;	// true
+	let faar = aSearch(sSearch);							// true
+	
+	console.log(arr, str);
+	console.log(foo, bar, baz, qux, far, faar);
 };
 
 test1();
