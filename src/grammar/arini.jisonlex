@@ -62,7 +62,7 @@
 
 
 "<"                                          {
-                                                if ((/^(\/|[a-z])/).test(this._input)) {
+                                                if ((/^(\/|[a-z])/i).test(this._input)) {
 													this.pushState("angleBracket");
 													return "<";
 												} else if ((/^\=/).test(this._input)) {

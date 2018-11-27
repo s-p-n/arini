@@ -138,7 +138,9 @@ class Scope {
 					let result = [];
 					for (let i = 0; i < name.length; i += 1) {
 						let val;
-						if (value.length <= i) {
+						if (value[name[i]] !== undefined) {
+							val = value[name[i]];
+						} else if (value.length <= i) {
 							val = undefined;
 						} else {
 							val = value[i];
@@ -146,6 +148,16 @@ class Scope {
 						result.push([name[i], val]);
 					}
 					self.declare(slot, ...result)
+				} else if (typeof value === "object") {
+					let result = [];
+					for (let i = 0; i < name.length; i += 1) {
+						let val;
+						if (value[name[i]] !== undefined) {
+							val = value[name[i]];
+						}
+						result.push([name[i], val]);
+					}
+					self.declare(slot, ...result);
 				} else {
 					throw new Error("Attempt to iterate over non-iterable during declaration");
 				}
@@ -377,7 +389,7 @@ class Scope {
 			case 0:
 				break;
 			case 1:
-				if (rest[0] instanceof Array) {
+				if (self.getType(rest[0]) === "array") {
 					children = rest[0];
 				} else {
 					attributes = rest[0];
@@ -387,6 +399,20 @@ class Scope {
 				attributes = rest[0];
 				children = rest[1];
 				break;
+		}
+		if (/^[A-Z]/.test(name[0])) {
+			console.log(`${name} could be an ID.`);
+			console.log(`Looking up ${name}...`);
+			let id = self.id[name];
+			if (self.getType(id) === "function") {
+				console.log(`${name} is a function. Using that instead of a Node.`);
+				//name = id;
+				let props = {...attributes};
+				props.children = children;
+				return id(props);
+			} else {
+				console.log(`${name} is not a function, using the Node <${name}...>.`);
+			}
 		}
 		return new Node(name, attributes, children);
 	}

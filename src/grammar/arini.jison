@@ -10,9 +10,9 @@
 %left '.'
 
 %right UMINUS INCREMENT DECREMENT RANDOM '...'
-%right BT_EXPR_OPEN BT_EXPR_CLOSE '{' '}'
+%right BT_EXPR_OPEN BT_EXPR_CLOSE '{' '}' '){'
 %right '[' ']'
-%right '(' ')' '){'
+%right '(' ')' 
 %right ','
 %right ';'
 
@@ -207,8 +207,8 @@ expr
 		{$$ = $invokeExpr;}
 	| binaryExpr
 		{$$ = $binaryExpr;}
-	//| '(' expr ')'
-	//	{$$ = '(' + $expr + ')';}
+	| '(' expr ')'
+		{$$ = '(' + $expr + ')';}
 	| unaryExpr
 		{$$ = $unaryExpr;}
 	;
@@ -391,7 +391,7 @@ scopeArgumentSpread
 
 
 scope
-	: scopeStart codeBlock '}'
+	: FUNCTION scopeStart codeBlock '}'
 		%{
 			$$ = $scopeStart + 'this._hasReturn=true;' + yy.scope.toJS() + ';this._hasReturn=false},' + yy.scope.hasReturn + ')';
 			yy.scope.end();

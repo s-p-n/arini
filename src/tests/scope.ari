@@ -1,106 +1,106 @@
 let test1 = {
-	let say = (what) {
-		console.log(what);
-	};
+    let say = (what) {
+        console.log(what);
+    };
 
-	let greet = (who) {
-		say("hello " + who);	
-	};
+    let greet = (who) {
+        say("hello " + who);    
+    };
 
-	let adieu = (who) {
-		say("farewell " + who);
-	};
+    let adieu = (who) {
+        say("farewell " + who);
+    };
 
-	greet("world");
-	adieu("world");
+    greet("world");
+    adieu("world");
 };
 
 let test2 = {
-	let say = (...what) {
-		console.log(...what);
-	};
-	let do = (f, ...args) {
-		f(...args);
-	};
-	do(say, "do say,", "young chap!");
+    let say = (...what) {
+        console.log(...what);
+    };
+    let do = (f, ...args) {
+        f(...args);
+    };
+    do(say, "do say,", "young chap!");
 };
 
 let test3 = {
-	let Tag = {
-		public tag;
-		public create = (attr) {
-			tag = <div ...attr />;
-		};
-	};
-	let attr = [
-		id: "test3",
-		class: "test",
-		onclick: {
-			console.log("clicked");
-		}
-	];
-	let t = Tag();
-	t.create(attr);
-	t.tag.attributes.onclick();
+    let Tag = {
+        public tag;
+        public create = (attr) {
+            tag = <div ...attr />;
+        };
+    };
+    let attr = [
+        id: "test3",
+        class: "test",
+        onclick: {
+            console.log("clicked");
+        }
+    ];
+    let t = Tag();
+    t.create(attr);
+    t.tag.attributes.onclick();
 };
 
 let test4 = {
-	let foo = (f, ...rest) {
-		f(...rest);
-	};
-	foo(console.log,2,3,4,5);
+    let foo = (f, ...rest) {
+        f(...rest);
+    };
+    foo(console.log,2,3,4,5);
 };
 
 let test5 = {
-	let print become console.log;
-	let foo become random from 1 to 10;
-	if (foo > 7) {
-		print(`${foo} is greater than 7.`);
-	} else if(foo > 5) {
-		print(`${foo} is greater than 5.`);
-	} else if (foo > 3) {
-		print(`${foo} is greater than 3.`);
-	} else {
-		print(`${foo} is less than or equal to 3.`);
-	};
+    let print become console.log;
+    let foo become random from 1 to 10;
+    if (foo > 7) {
+        print(`${foo} is greater than 7.`);
+    } else if(foo > 5) {
+        print(`${foo} is greater than 5.`);
+    } else if (foo > 3) {
+        print(`${foo} is greater than 3.`);
+    } else {
+        print(`${foo} is less than or equal to 3.`);
+    };
 };
 
 let test6 = {
-	let search = (what) {
-		return (subject) {
-			if (scope.getType(subject) is "string") {
-				console.log(JSON.stringify(subject), "is a string");
-				if(true) {
-					return subject.indexOf(what) isnt -1;
-				};
-			};
+    let search = (what) {
+        return (subject) {
+            if (scope.getType(subject) is "string") {
+                console.log(JSON.stringify(subject), "is a string");
+                if(true) {
+                    return subject.indexOf(what) isnt -1;
+                };
+            };
 
-			if (scope.getType(subject) is "array") {
-				console.log(JSON.stringify(subject), "is an array");
-				return subject.some(search(what));
-			};
+            if (scope.getType(subject) is "array") {
+                console.log(JSON.stringify(subject), "is an array");
+                return subject.some(search(what));
+            };
 
-			console.log(JSON.stringify(subject), "is not a string or array");
-			return subject is what;
-		};
-	};
-	let arr = ["Hello", "World"];
-	let str = arr.join(", ");
-	let term = "Hell";
-	let regex = XRegExp(term);
-	let aSearch = Array.prototype.some.bind(arr);
-	let sSearch = RegExp.prototype.test.bind(regex);
+            console.log(JSON.stringify(subject), "is not a string or array");
+            return subject is what;
+        };
+    };
+    let arr = ["Hello", "World"];
+    let str = arr.join(", ");
+    let term = "Hell";
+    let regex = XRegExp(term);
+    let aSearch = Array.prototype.some.bind(arr);
+    let sSearch = RegExp.prototype.test.bind(regex);
 
-	// Expect----------------------------------------------->________
-	let foo becomes search(term) from str;					// true
-	let bar becomes search (term) from arr;					// true
-	let baz = arr has term;									// false
-	let qux = arr.some(sSearch);							// true
-	let far = RegExp.prototype.test.bind(regex) from str;	// true
-	let faar = aSearch(sSearch);							// true
-	
-	console.log(arr, str);
-	console.log(foo, bar, baz, qux, far, faar);
+    // Expect----------------------------------------------->________
+    let foo becomes search(term) from str;                  // true
+    let bar becomes search (term) from arr;                 // true
+    let baz = arr has term;                                 // false
+    let qux = arr.some(sSearch);                            // true
+    let far = RegExp.prototype.test.bind(regex) from str;   // true
+    let faar = aSearch(sSearch);                            // true
+    
+    console.log(arr, str);
+    console.log(foo, bar, baz, qux, far, faar);
 };
 
 test1();
