@@ -31,32 +31,25 @@ module.exports = function setScopeState(parser) {
 
 		begin () {
 			let self = parser.yy.scope;
-			console.log("creating new scope");
-			console.log("parent:", self);
 			parser.yy.scope = new Scope(self);
-			console.log("in new scope:");
-			console.log(parser.yy.scope);
 		}
 
 		beginParen () {
 			let self = parser.yy.scope;
 			let parent = self.argState || null;
-			console.log("beginParen");
 			self.argState = Object.create(null);
 			self.argState.parent = parent;
 			priv.set(self.argState, []);
-			console.log(priv.get(self.argState));
 		}
 
 		endParen (isScopeArg) {
 			let self = parser.yy.scope;
 			let args = [];
 
-			console.log("endParen", isScopeArg);
 			if (isScopeArg) {
 				priv.get(self).args = priv.get(self.argState);
 			}
-			if (self.argState.parent !== null) {
+			if (self.argState && self.argState.parent !== null) {
 				self.argState = self.argState.parent;
 			}
 		}
@@ -64,18 +57,14 @@ module.exports = function setScopeState(parser) {
 		end () {
 			let self = parser.yy.scope;
 			parser.yy.scope = self.parent;
-			console.log("ending scope, entering parent:");
-			console.log(parser.yy.scope);
 		}
 
 		pushArg (name, defaultValue) {
 			let self = parser.yy.scope;
 			let args = priv.get(self.argState);
 			let i;
-			console.log("pushing arg:", name);
 			i = args.length;
 			args.push(`[${name},((args[${i}]!==undefined)?(args[${i}]):(${defaultValue}))]`);
-			console.log(args);
 			return self.args;
 		}
 

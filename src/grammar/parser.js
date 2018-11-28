@@ -241,7 +241,7 @@ break;
 case 49: case 51:
 this.$ = `${$$[$0-2]},${$$[$0]}`;
 break;
-case 50: case 54: case 57: case 58: case 60: case 73: case 78: case 80: case 81: case 82: case 83: case 87: case 88: case 95: case 111: case 112: case 119: case 120: case 128:
+case 50: case 54: case 57: case 58: case 60: case 73: case 78: case 80: case 81: case 82: case 83: case 84: case 87: case 88: case 95: case 111: case 112: case 119: case 120: case 128:
 this.$ = $$[$0];
 break;
 case 52: case 109:
@@ -345,9 +345,6 @@ this.$ = `${$$[$0-3]}(${$$[$0-1]})`;
 break;
 case 79:
 this.$ = $$[$0].toLowerCase();
-break;
-case 84:
-this.$ = $$[$0].toJS();
 break;
 case 85:
 this.$ = undefined;
@@ -492,14 +489,13 @@ case 121:
 					});
 				}
 
-				return tag;
+				return tag.toJS();
 			}());
-
+			yy.scope.end();
 		
 break;
 case 122:
 
-			yy.scope.end();
 			this.$ = $$[$0-1];
 		
 break;
@@ -508,12 +504,13 @@ case 123:
 			this.$ = (function () {
 				let parent = yy.scope;
 				yy.scope.begin();
+				console.log($$[$0-2], yy.scope.expressions);
 				return new yy.xml.Tag($$[$0-2], $$[$0-1], yy.scope.expressions, parent);
 			}());
 		
 break;
 case 124:
-this.$ = (new yy.xml.Tag($$[$0-2], $$[$0-1], [], yy.scope.expressions));
+this.$ = (new yy.xml.Tag($$[$0-2], $$[$0-1], [], yy.scope.expressions)).toJS();
 break;
 case 125:
 this.$ = '-' + $$[$0]

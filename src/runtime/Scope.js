@@ -4,13 +4,14 @@ if (typeof window !== "undefined") {
     window["global"] = window;
   }
 }
-
+const Api = <include file="./Api.js"/>;
 const Node = <include file="./Node.js"/>;
 const TextNode = <include file="./TextNode.js"/>;
 const associativeMap = <include file="./associativeMap.js"/>;
 const priv = new WeakMap();
-class Scope {
+class Scope extends Api {
 	constructor () {
+		super();
 		const self = this;
 		self._scoping = {
 			let: self.map(),

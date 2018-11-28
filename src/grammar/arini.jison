@@ -330,7 +330,7 @@ literal
 	| string
 		{$$ = $string;}
 	| tag
-		{$$ = $tag.toJS();}
+		{$$ = $tag;}
 	| UNDEFINED
 		{$$ = undefined;}
 	;
@@ -529,16 +529,15 @@ tagBlock
 					});
 				}
 
-				return tag;
+				return tag.toJS();
 			}());
-
+			yy.scope.end();
 		}
 	;
 
 tagBlockEnd
 	: "<" XML_BLOCK_END XML_CLOSE_ID XML_BLOCK_CLOSE
 		{
-			yy.scope.end();
 			$$ = $XML_CLOSE_ID;
 		}
 	;
@@ -549,6 +548,7 @@ tagBlockStart
 			$$ = (function () {
 				let parent = yy.scope;
 				yy.scope.begin();
+				console.log($XML_OPEN_ID, yy.scope.expressions);
 				return new yy.xml.Tag($XML_OPEN_ID, $attributeList, yy.scope.expressions, parent);
 			}());
 		}
@@ -556,7 +556,7 @@ tagBlockStart
 
 tagShort
 	: "<" XML_OPEN_ID attributeList XML_SHORT_CLOSE
-		{$$ = (new yy.xml.Tag($XML_OPEN_ID, $attributeList, [], yy.scope.expressions));}
+		{$$ = (new yy.xml.Tag($XML_OPEN_ID, $attributeList, [], yy.scope.expressions)).toJS();}
 	;
 
 unaryExpr

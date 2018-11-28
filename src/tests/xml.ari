@@ -1,0 +1,19 @@
+let Sum = f(props) {
+	let result = <input ...props name="sum" />;
+	// TODO:
+	/*
+		Would be cool to have an attribute like <input get:value={return a + b;} />
+	*/
+	Object.defineProperty(result.attributes, "value", [
+		get: f() {
+			return result.attributes.a + result.attributes.b;
+		}
+	]);
+    return result;
+};
+
+let result = <div>
+	<Sum a=1 b=3 />;
+</div>;
+result.children[0].attributes.a = 17;
+console.log(result.children[0].attributes.value);

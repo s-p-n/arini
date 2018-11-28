@@ -1,22 +1,18 @@
 module.exports = function setXmlState (parser) {
 	class Tag {
-		constructor (tagName, attributes, children = [], parent = null) {
+		constructor (tagName, attributes) {
 			this.tagName = tagName;
 			this.attributes = attributes;
-			this.children = children;
-			this.parent = parent;
-		}
-		nest (child) {
-			this.children.push(child);
 		}
 		toJS () {
+			let children = parser.yy.scope.expressions;
 			let result = `scope.xml("${this.tagName}",{${this.attributes}}`;
-			if (this.children.length === 0) {
+			if (children.length === 0) {
 				return result + ")";
 			}
 			result += ",[";
-			for (let i = 0; i < this.children.length; i += 1) {
-				let child = this.children[i];
+			for (let i = 0; i < children.length; i += 1) {
+				let child = children[i];
 				if (i !== 0) {
 					result += ",";
 				}

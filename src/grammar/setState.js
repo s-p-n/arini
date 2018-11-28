@@ -82,7 +82,6 @@ module.exports = function setState (parser, runtime={}) {
 
 	parser.eval = function () {
 		let code = `[${Object.keys(runtime).join(',')}]=[${Object.values(runtime).join(',')}];`;
-		console.log(parser.yy.scope);
 		let processedArini = parser.yy.scope.toJS();
 		code += `module.exports = (function () {${processedArini}}());`;
 		console.log(processedArini);
