@@ -9,7 +9,27 @@ let namedTokens = [
 	}],
 	["is", "EQ"],
 	["isnt", "INEQ"],
-	["f(un(ction)?)?", "FUNCTION"],
+	["func(tion)?", "FUNCTION"
+	/*function (txt) {
+		// privous implementation: "f(un(ction)?)?" or "f|fun|function"
+		// `Is '${txt}' a function or ID? hmm....`
+		// "Let's see.. Here's what comes next:"
+		// this._input
+
+		// If next token is '{'
+		if (/^\s*\{/.test(this._input)) {
+			return "FUNCTION";
+		}
+
+		// If next token is '(', it could be an invokation- but could also be a function declaration.
+		// It's not trivial to figure out which- and figuring that out is an expensive operation.
+		// A human could very likely be confused when seeing `f(...` as well. Seeing as, f(foo){} is a
+		// function literal, might `f(foo)...` appear as a function literal too (as opposed to an invokation)?
+		// 
+		if (/^\s*)
+
+		return "JSPROPERTY";
+	}*/],
 	["BECOME(S)?", "BECOMES"],
 	"AND",
 	"BY",

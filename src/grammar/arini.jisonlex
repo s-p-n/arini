@@ -20,6 +20,7 @@
 %s ifParen
 %s paren
 %s formalArguments
+%s controlCode
 
 %%
 
@@ -27,6 +28,7 @@
 "("\s*")"\s*"{"                              {
 											 	yy.scope.beginParen();
 											 	yy.scope.endParen(true);
+											 	this.pushState('controlCode');
 												return '(){';
 											 }
 "if"\s*"("                                   {
@@ -41,6 +43,7 @@
 											 }
 <paren>")"\s*"{"                             {
 												this.popState();
+												this.pushState("controlCode");
 												return "){";
 											 }
 <paren>")"                                   {
@@ -48,7 +51,6 @@
 												yy.scope.endParen(false);
 												return ")";
 											 }
-<paren>'='|':'|'becomes'                     {return "BECOMES";}
 <paren>","                                   {return ",";}
 '...'                                        {return '...';}
 
@@ -88,8 +90,8 @@
 
 <xmlTagOpen>">"                              {this.popState(); return "XML_BLOCK_START";}
 <xmlTagOpen>"/>"                             {this.popState(); return "XML_SHORT_CLOSE";}
-<xmlTagOpen>"="                              {return "XML_ATTR_BECOMES";}
-
+/*<xmlTagOpen>"="                              {return "XML_ATTR_BECOMES";}
+*/
 <xmlBlockClose>\s+                           /* skip whitespace */
 <xmlBlockClose>">"                           {this.popState(); return "XML_BLOCK_CLOSE";}
 <xmlBlockClose>[a-z][a-z0-9\-\_\$]*          {return "XML_CLOSE_ID";}
@@ -138,7 +140,7 @@ r(?:\'\'\'|\"\"\"|[/"'@~%`])      		 	%{
                                                  	}
                                                  }
 
-                                                 if (/^\s*(\:|\=|BECOMES)/.test(this._input)) {
+                                                 if (/^\s*(\=|BECOMES?)/.test(this._input)) {
                                                  	return "NAME";
                                                  }
                                                  if (!(/\-/).test(yytext)) {
@@ -167,8 +169,11 @@ r(?:\'\'\'|\"\"\"|[/"'@~%`])      		 	%{
                                                 })();
                                             }
 
-"{"                                          {return "{";}
-"}"                                          {return "}";}
+"{"                                          {this.pushState("controlCode");return "{";}
+<controlCode>"}"                             {
+												this.popState();
+												return "}";
+											 }
 ".."                                         {return "TO";}
 \"(\\\"|[^\"])*\"                            {return "QSTRING";}
 \'(\\\'|[^\'])*\'                            {return "ASTRING";}
@@ -188,7 +193,7 @@ r(?:\'\'\'|\"\"\"|[/"'@~%`])      		 	%{
 "."                                          {return ".";}
 ","                                          {return ",";}
 "="                                          {return "BECOMES";}
-":"                                          {return "BECOMES";}
+":"                                          {return ":";}
 [a-z][a-z0-9\-\_\$]*                         {
                                                  for (let [search, result] of yy.namedTokens) {
                                                  	if (search.test(yytext)) {

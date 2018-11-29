@@ -58,7 +58,7 @@ arrayItems
 	;
 
 attribute
-	: property XML_ATTR_BECOMES expr
+	: property BECOMES expr
 		{
 			$$ = [$property, $expr];
 		}
@@ -141,6 +141,34 @@ binaryExpr
 		{$$ = `scope.unpack(${$b}).using(${$a})`;}
 	;
 
+cast
+	: property ':'
+		%{
+			$$ = (function () {
+				let t = $property;
+				let types = [
+					["number", "Number"] ,
+					["bool(ean)?", "Boolean"],
+					["string", "String"],
+					["regex", "XRegExp"],
+					["array", "Array"]
+				];
+
+				for (let [search, replace] of types) {
+					let r = new RegExp("^(?:" + search + ")$", "i");
+					if (r.test(t)) {
+						t = replace;
+						break;
+					}
+				}
+
+				console.log("got cast:");
+				console.log(`${t}:`);
+				return `scope.id.${t}`;
+			}());
+		%}
+	;
+
 codeBlock
 	: decStatements controlCode
 	;
@@ -178,6 +206,8 @@ decProperty
 		{$$ = `[[${$decPropertyList}],${$expr}]`;}
 	| property
 		{$$ = `["${$property}",]`;}
+	| cast property BECOMES expr
+		{$$ = `["${$property}",${$expr},${$cast}]`;}
 	| decProperty ',' decProperty
 		{$$ = `${$1},${$3}`;}
 	;
@@ -391,7 +421,7 @@ scopeArgumentSpread
 
 
 scope
-	: FUNCTION scopeStart codeBlock '}'
+	: scopeStart codeBlock '}'
 		%{
 			$$ = $scopeStart + 'this._hasReturn=true;' + yy.scope.toJS() + ';this._hasReturn=false},' + yy.scope.hasReturn + ')';
 			yy.scope.end();
@@ -399,7 +429,7 @@ scope
 	;
 
 scopeStart
-	: '(' scopeArguments '){'
+	: FUNCTION '(' scopeArguments '){'
 		%{
 			yy.scope.endParen(true);
 			$$ = (function () {
@@ -408,7 +438,7 @@ scopeStart
 				return `scope.createScope(function(...args){${args}`;
 			}());
 		%}
-	| '(' scopeArguments ',' scopeArgumentSpread '){'
+	| FUNCTION '(' scopeArguments ',' scopeArgumentSpread '){'
 		%{
 			yy.scope.endParen(true);
 			$$ = (function () {
@@ -420,7 +450,7 @@ scopeStart
 				return `scope.createScope(function(...args){${args}${spread}`;
 			}());
 		%}
-	| '(' scopeArgumentSpread '){'
+	| FUNCTION '(' scopeArgumentSpread '){'
 		%{
 			yy.scope.endParen(true);
 			$$ = (function () {
@@ -430,7 +460,12 @@ scopeStart
 				return `scope.createScope(function(...args){${spread}`;
 			}());
 		%}
-	| '(){'
+	| FUNCTION '(){'
+		%{
+			yy.scope.begin();
+			$$ = 'scope.createScope(function(){';
+		%}
+	| FUNCTION '{'
 		%{
 			yy.scope.begin();
 			$$ = 'scope.createScope(function(){';
@@ -521,7 +556,7 @@ tagBlock
 
 				if (tag.tagName !== $tagBlockEnd) {
 					yy.parseError(`Tag mismatch: `, {
-						text: `</${$tagBlockEnd}><f`,
+						text: `</${$tagBlockEnd}>`,
 						token: yytext,
 						line: yylineno,
 						solution: `Change ${$tagBlockEnd} to ${tag.tagName}, or the other way around.`,

@@ -1,0 +1,23 @@
+
+let tests = [
+	{
+		let string:foo = "im foo";
+		let number:bar = "im bar";
+
+		// string number
+		console.log(scope.getType(foo), scope.getType(bar));
+		// "im foo", NaN
+		console.log(foo, bar);
+
+		foo = 42;
+		bar = 24;
+
+		// string number 
+		console.log(scope.getType(foo), scope.getType(bar));
+
+		// "42", 24
+		console.log(foo, bar);
+	}
+];
+
+tests[0]();

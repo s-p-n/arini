@@ -1,13 +1,13 @@
 let test1 = {
-    let say = (what) {
+    let say = func(what) {
         console.log(what);
     };
 
-    let greet = (who) {
+    let greet = func(who) {
         say("hello " + who);    
     };
 
-    let adieu = (who) {
+    let adieu = func(who) {
         say("farewell " + who);
     };
 
@@ -16,10 +16,10 @@ let test1 = {
 };
 
 let test2 = {
-    let say = (...what) {
+    let say = func(...what) {
         console.log(...what);
     };
-    let do = (f, ...args) {
+    let do = func(f, ...args) {
         f(...args);
     };
     do(say, "do say,", "young chap!");
@@ -28,7 +28,7 @@ let test2 = {
 let test3 = {
     let Tag = {
         public tag;
-        public create = (attr) {
+        public create = func(attr) {
             tag = <div ...attr />;
         };
     };
@@ -45,7 +45,7 @@ let test3 = {
 };
 
 let test4 = {
-    let foo = (f, ...rest) {
+    let foo = func(f, ...rest) {
         f(...rest);
     };
     foo(console.log,2,3,4,5);
@@ -56,7 +56,7 @@ let test5 = {
     let foo become random from 1 to 10;
     if (foo > 7) {
         print(`${foo} is greater than 7.`);
-    } else if(foo > 5) {
+    } else if (foo > 5) {
         print(`${foo} is greater than 5.`);
     } else if (foo > 3) {
         print(`${foo} is greater than 3.`);
@@ -66,11 +66,11 @@ let test5 = {
 };
 
 let test6 = {
-    let search = (what) {
-        return (subject) {
+    let search = func(what) {
+        return func(subject) {
             if (scope.getType(subject) is "string") {
                 console.log(JSON.stringify(subject), "is a string");
-                if(true) {
+                if (true) {
                     return subject.indexOf(what) isnt -1;
                 };
             };
@@ -93,7 +93,7 @@ let test6 = {
 
     // Expect----------------------------------------------->________
     let foo becomes search(term) from str;                  // true
-    let bar becomes search (term) from arr;                 // true
+    let bar becomes search(term) from arr;                  // true
     let baz = arr has term;                                 // false
     let qux = arr.some(sSearch);                            // true
     let far = RegExp.prototype.test.bind(regex) from str;   // true
@@ -103,9 +103,14 @@ let test6 = {
     console.log(foo, bar, baz, qux, far, faar);
 };
 
+let test7 = {
+    
+};
+
 test1();
 test2();
 test3();
 test4();
 test5();
 test6();
+test7();

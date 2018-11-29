@@ -26,7 +26,7 @@ class Scope extends Api {
 				if (slot === "parent" || typeof ctx[slot].has !== "function") {
 					continue;
 				}
-				if (ctx[slot].has(prop)) {
+				if (prop in ctx[slot]) {
 					return ctx[slot][prop];
 				}
 			}
@@ -133,7 +133,7 @@ class Scope extends Api {
 		const self = this;
 		let slots = ['let', 'private', 'protected', 'public'];
 		let results = [];
-		for (let [name, value] of sets) {
+		for (let [name, value, cast] of sets) {
 			if(name instanceof Array) {
 				if (value !== null && typeof value[Symbol.iterator] === 'function') {
 					let result = [];
@@ -179,7 +179,65 @@ class Scope extends Api {
 				throw new Error(`'${slot} ${name}' already declared.`);
 			}
 			**/
-			self._scoping[slot][name] = value;
+			if (cast !== undefined) {
+				//console.log("cast exists:");
+				//console.log(cast);
+
+				if (cast === String) {
+					//console.log("cast to string");
+					let val = (typeof value === "string") ? value : "";
+					Object.defineProperty(self._scoping[slot], name, {
+						get() {
+							//console.log(`${name} str-getter`);
+							return val;
+						},
+						set(newValue) {
+							//console.log(`${name} str-setter => "${newValue}"`);
+							if (typeof newValue === "string") {
+								return val = newValue;
+							}
+							return val = String(newValue);
+						},
+						enumerable: true
+					});
+				} else if (cast === Number) {
+					//console.log("cast to number");
+					let val = (typeof value === "number") ? value : NaN;
+					Object.defineProperty(self._scoping[slot], name, {
+						get() {
+							//console.log(`${name} num-getter`);
+							return val;
+						},
+						set(newValue) {
+							//console.log(`${name} num-setter => "${newValue}"`);
+							if (typeof newValue === "number") {
+								return val = newValue;
+							}
+							return val = Number(newValue);
+						},
+						enumerable: true
+					});
+				} else {
+					let val = (value instanceof cast) ? value : cast();
+					Object.defineProperty(self._scoping[slot], name, {
+						get() {
+							console.log(`${name} getter`);
+							return val;
+						},
+						set(newValue) {
+							console.log(`${name} setter => "${newValue}"`);
+							if (newValue instanceof cast) {
+								return val = newValue;
+							}
+						},
+						enumerable: true
+					});
+				}
+			} else {
+				self._scoping[slot][name] = value;
+			}
+			//console.log(self._scoping[slot]);
+			//console.log(self._scoping[slot][name]);
 			results.push(value);
 		}
 		// not necessary to return anything
@@ -351,6 +409,9 @@ class Scope extends Api {
 				return self.set(obj.parent, prop, val);
 			}
 			if (obj[slot].has(prop)) {
+				return obj[slot][prop] = val;
+			}
+			if (prop in obj[slot]) {
 				return obj[slot][prop] = val;
 			}
 		}
