@@ -9,7 +9,7 @@
 %left POWER
 %left '.'
 
-%right UMINUS INCREMENT DECREMENT RANDOM '...'
+%right UMINUS INCREMENT DECREMENT RANDOM SPREAD
 %right BT_EXPR_OPEN BT_EXPR_CLOSE '{' '}' '){'
 %right '[' ']'
 %right '(' ')' 
@@ -58,7 +58,7 @@ arrayItem
 		{
 			yy.array.active.push($expr);
 		}
-	| '...' expr
+	| SPREAD expr
 		{
 			yy.array.active.pushSpread($expr);
 		}
@@ -95,7 +95,7 @@ attributeList
 				return `${$attributeList}"${$attribute[0]}":${$attribute[1]}`;
 			}());
 		}
-	| attributeList '...' expr
+	| attributeList SPREAD expr
 		{
 			if ($attributeList !== "") {
 				$attributeList += ",";
@@ -345,7 +345,7 @@ ifStmtLineStart
 invokeArgs
 	: expr
 		{$$ = $expr;}
-	| '...' expr
+	| SPREAD expr
 		{$$ = "..." + $expr;}
 	| invokeArgs ',' expr
 		{$$ = $invokeArgs + "," + $expr;}
@@ -427,7 +427,7 @@ returnStmt
 	;
 
 scopeArgumentSpread
-	: '...' property
+	: SPREAD property
 		{$$ = $property;}
 	;
 

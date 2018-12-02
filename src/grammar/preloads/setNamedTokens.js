@@ -50,6 +50,7 @@ let namedTokens = [
 	"PLUS",
 	"RANDOM",
 	"RETURN",
+	"SPREAD",
 	"TIMES",
 	"TO",
 	"UNDEFINED",

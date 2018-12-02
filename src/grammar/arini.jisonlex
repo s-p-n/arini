@@ -52,7 +52,7 @@
 												return ")";
 											 }
 <paren>","                                   {return ",";}
-'...'                                        {return '...';}
+'...'                                        {return 'SPREAD';}
 
 '`'				                             {this.pushState('inBacktick'); return 'BT_OPEN';}
 <inBacktick>'`'                              {this.popState(); return 'BT_CLOSE';}
