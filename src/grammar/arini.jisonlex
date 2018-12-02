@@ -169,11 +169,15 @@ r(?:\'\'\'|\"\"\"|[/"'@~%`])      		 	%{
                                                 })();
                                             }
 
-"{"                                          {this.pushState("controlCode");return "{";}
+"{"                                          {
+												this.pushState("controlCode");
+												return "{";
+											 }
 <controlCode>"}"                             {
 												this.popState();
 												return "}";
 											 }
+"}"                                          {return "}";}
 ".."                                         {return "TO";}
 \"(\\\"|[^\"])*\"                            {return "QSTRING";}
 \'(\\\'|[^\'])*\'                            {return "ASTRING";}

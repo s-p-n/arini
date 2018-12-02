@@ -16,6 +16,7 @@ module.exports = function setArrayState(parser) {
 			this.id = ID();
 			this.items = [];
 			this.pairs = [];
+			this.spreads = [];
 			this.parent = parent;
 		}
 
@@ -25,6 +26,11 @@ module.exports = function setArrayState(parser) {
 			} else {
 				this.pairs.push([name, value]);
 			}
+		}
+
+		pushSpread (expr) {
+			this.items.push('...' + expr);
+			this.pairs.push([,expr]);
 		}
 
 		toScope () {
@@ -41,8 +47,16 @@ module.exports = function setArrayState(parser) {
 			}
 			result += "];"
 			for (let [key, val] of this.pairs) {
-				result += `arr["${key}"]=${val};`;
+				if (typeof key === "string") {
+					result += `arr[${key}]=${val};`;
+				} else {
+					result += `scope.shallowClone(arr, ${val});`
+				}
+
 			}
+			//for (let i = 0; i < this.spreads.length; i += 1) {
+			//	result += `scope.shallowClone(arr, ${this.spreads[i]});`;
+			//}
 			result += "return arr;"
 			return result + '}())';
 		}

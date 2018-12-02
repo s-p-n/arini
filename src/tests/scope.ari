@@ -33,9 +33,9 @@ let test3 = {
         };
     };
     let attr = [
-        id: "test3",
-        class: "test",
-        onclick: {
+        id = "test3",
+        class = "test",
+        onclick = {
             console.log("clicked");
         }
     ];

@@ -44,11 +44,23 @@ array
 arrayItem
 	: NAME BECOMES expr
 		{
-			yy.array.active.push($NAME, $expr);
+			yy.array.active.push(`"${$NAME}"`, $expr);
+		}
+	| string BECOMES expr
+		{
+			yy.array.active.push($string, $expr);
+		}
+	| "(" expr[a] ")" BECOMES expr[b]
+		{
+			yy.array.active.push($a, $b);
 		}
 	| expr
 		{
 			yy.array.active.push($expr);
+		}
+	| '...' expr
+		{
+			yy.array.active.pushSpread($expr);
 		}
 	;
 

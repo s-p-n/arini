@@ -1,0 +1,55 @@
+/**
+	Goal stateChain:
+	let foo = ['a', 'b', 'c'];
+	^[controlCode]
+
+	let foo = ['a', 'b', 'c'];
+	           ^[controlCode,array]
+
+	let foo = ['a', 'b', 'c'];
+	                         ^[controlCode]
+
+
+
+**/
+
+let Dynamic = func(obj, prop, arr) {
+	let descriptor = [
+		enumerable = true,
+		...arr
+	];
+	console.log(descriptor);
+	Object.defineProperty(obj, prop, descriptor);
+};
+
+let Lexer = {
+	public rules = [
+		'a' = 'val a',
+		b = 'val b',
+		(r'c') = 'val c'
+	];
+	public Dynamic:state = [
+		get = {
+			if (stateChain.length is 0) {
+				return 0;
+			};
+			return stateChain[stateChain.length - 1];
+		},
+		set = func(newVal) {
+			console.log("state setter", newVal);
+			if (rules has newVal) {
+				console.log("pushing rule..");
+				stateChain.push(newVal);
+			};
+			console.log("stateChain:", stateChain);
+			return state;
+		}
+	];
+	public stateChain = [];
+	console.log(rules);
+	state = rules.a;
+	console.log("state:", state);
+};
+
+let l = Lexer();
+console.log(l);

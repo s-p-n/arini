@@ -89,7 +89,7 @@ module.exports = function setState (parser, runtime={}) {
 		return requireFromString(code, "shell");
 	}
 
-	parser.yy.parseError = function parseError (str="", hash={
+	parser.yy.parseError = function (str="", hash={
 		text: "",
 		line: 0,
 		token: "",
@@ -113,6 +113,7 @@ Token: ${hash.token}`);
 		if (hash.recoverable) {
 			console.log("Error is recoverable.");
 		} else {
+			console.log(this.pushState);
 			process.exit();
 		}
 	}

@@ -185,7 +185,7 @@ class Scope extends Api {
 
 				if (cast === String) {
 					//console.log("cast to string");
-					let val = (typeof value === "string") ? value : "";
+					let val = String(value);
 					Object.defineProperty(self._scoping[slot], name, {
 						get() {
 							//console.log(`${name} str-getter`);
@@ -202,7 +202,7 @@ class Scope extends Api {
 					});
 				} else if (cast === Number) {
 					//console.log("cast to number");
-					let val = (typeof value === "number") ? value : NaN;
+					let val = Number(value);
 					Object.defineProperty(self._scoping[slot], name, {
 						get() {
 							//console.log(`${name} num-getter`);
@@ -218,20 +218,7 @@ class Scope extends Api {
 						enumerable: true
 					});
 				} else {
-					let val = (value instanceof cast) ? value : cast();
-					Object.defineProperty(self._scoping[slot], name, {
-						get() {
-							console.log(`${name} getter`);
-							return val;
-						},
-						set(newValue) {
-							console.log(`${name} setter => "${newValue}"`);
-							if (newValue instanceof cast) {
-								return val = newValue;
-							}
-						},
-						enumerable: true
-					});
+					cast(self._scoping[slot], name, value);
 				}
 			} else {
 				self._scoping[slot][name] = value;
