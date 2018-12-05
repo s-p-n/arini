@@ -7,10 +7,10 @@
 %left MINUS PLUS
 %left TIMES DIVIDE MODULUS
 %left POWER
-%left '.'
+%left '.' PROPERTY JSPROPERTY
 
 %right UMINUS INCREMENT DECREMENT RANDOM SPREAD
-%right BT_EXPR_OPEN BT_EXPR_CLOSE '{' '}' '){'
+%right BT_EXPR_OPEN BT_EXPR_CLOSE '{' '}' '){' '(){'
 %right '[' ']'
 %right '(' ')' 
 %right ','
@@ -53,6 +53,10 @@ arrayItem
 	| "(" expr[a] ")" BECOMES expr[b]
 		{
 			yy.array.active.push($a, $b);
+		}
+	| scopeDecl
+		{
+			yy.array.active.push(`"${$scopeDecl.name}"`, $scopeDecl.expr);
 		}
 	| expr
 		{
@@ -218,6 +222,8 @@ decProperty
 		{$$ = `[[${$decPropertyList}],${$expr}]`;}
 	| property
 		{$$ = `["${$property}",]`;}
+	| scopeDecl
+		{$$ = `["${$scopeDecl.name}", ${$scopeDecl.expr}]`;}
 	| cast property BECOMES expr
 		{$$ = `["${$property}",${$expr},${$cast}]`;}
 	| decProperty ',' decProperty
@@ -431,12 +437,142 @@ scopeArgumentSpread
 		{$$ = $property;}
 	;
 
-
 scope
 	: scopeStart codeBlock '}'
 		%{
-			$$ = $scopeStart + 'this._hasReturn=true;' + yy.scope.toJS() + ';this._hasReturn=false},' + yy.scope.hasReturn + ')';
+			$$ = $scopeStart + 
+				'this._hasReturn=true;' + 
+				yy.scope.toJS() + 
+				';this._hasReturn=false},' + 
+				yy.scope.hasReturn + 
+			')';
 			yy.scope.end();
+		%}
+	;
+
+scopeDecl
+	: scopeDeclStart codeBlock '}'
+		%{
+			console.log("scopeDecl:");
+			console.log($scopeDeclStart);
+			$$ = {
+				name: $scopeDeclStart.name,
+				expr: 
+					$scopeDeclStart.expr + 
+					'this._hasReturn=true;' + 
+					yy.scope.toJS() + 
+					';this._hasReturn=false},' + 
+					yy.scope.hasReturn + 
+				')'
+			};
+			yy.scope.end();
+		%}
+	;
+
+scopeDeclStart
+	: PROPERTY '(' scopeArguments '){'
+		%{
+			yy.scope.endParen(true);
+			$$ = (function () {
+				let args = yy.scope.argsDecl;
+				yy.scope.begin();
+				return {
+					name: $PROPERTY,
+					expr: `scope.createScope(function(...args){${args}`
+				};
+			}());
+		%}
+	| JSPROPERTY '(' scopeArguments '){'
+		%{
+			yy.scope.endParen(true);
+			$$ = (function () {
+				let args = yy.scope.argsDecl;
+				yy.scope.begin();
+				return {
+					name: $JSPROPERTY,
+					expr: `scope.createScope(function ${$JSPROPERTY}(...args){${args}`
+				};
+			}());
+		%}
+	| PROPERTY '(' scopeArguments ',' scopeArgumentSpread '){'
+		%{
+			yy.scope.endParen(true);
+			$$ = (function () {
+				let args = yy.scope.argsDecl;
+				let argsLength = yy.scope.argsLength;
+				let spreadProp = $scopeArgumentSpread;
+				let spread = `scope.declare("let", ["${spreadProp}",args.slice(${argsLength})]);`;
+				yy.scope.begin();
+				return {
+					name: $PROPERTY,
+					expr: `scope.createScope(function(...args){${args}${spread}`
+				};
+			}());
+		%}
+	| JSPROPERTY '(' scopeArguments ',' scopeArgumentSpread '){'
+		%{
+			yy.scope.endParen(true);
+			$$ = (function () {
+				let args = yy.scope.argsDecl;
+				let argsLength = yy.scope.argsLength;
+				let spreadProp = $scopeArgumentSpread;
+				let spread = `scope.declare("let", ["${spreadProp}",args.slice(${argsLength})]);`;
+				yy.scope.begin();
+				return {
+					name: $JSPROPERTY,
+					expr: `scope.createScope(function ${$JSPROPERTY}(...args){${args}${spread}`
+				};
+			}());
+		%}
+	| PROPERTY '(' scopeArgumentSpread '){'
+		%{
+			yy.scope.endParen(true);
+			$$ = (function () {
+				let spreadProp = $scopeArgumentSpread;
+				let spread = `scope.declare("let", ["${spreadProp}",args]);`;
+				yy.scope.begin();
+				return {
+					name: $PROPERTY,
+					expr: `scope.createScope(function(...args){${spread}`
+				};
+			}());
+		%}
+	| JSPROPERTY '(' scopeArgumentSpread '){'
+		%{
+			yy.scope.endParen(true);
+			$$ = (function () {
+				let spreadProp = $scopeArgumentSpread;
+				let spread = `scope.declare("let", ["${spreadProp}",args]);`;
+				yy.scope.begin();
+				return {
+					name: $JSPROPERTY,
+					expr: `scope.createScope(function ${$JSPROPERTY}(...args){${spread}`
+				};
+			}());
+		%}
+	| property '(){'
+		%{
+			yy.scope.begin();
+			let fnName = $property
+			if (/\-/.test($property)) {
+				fnName = "";
+			}
+			$$ = {
+				name: $property,
+				expr: `scope.createScope(function ${fnName}(){`
+			};
+		%}
+	| property '{'
+		%{
+			yy.scope.begin();
+			let fnName = $property
+			if (/\-/.test($property)) {
+				fnName = "";
+			}
+			$$ = {
+				name: $property,
+				expr: `scope.createScope(function ${fnName}(){`
+			};
 		%}
 	;
 

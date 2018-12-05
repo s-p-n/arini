@@ -13,7 +13,7 @@
 
 **/
 
-let Dynamic = func(obj, prop, arr) {
+let Dynamic (obj, prop, arr) {
 	let descriptor = [
 		enumerable = true,
 		...arr
@@ -22,20 +22,20 @@ let Dynamic = func(obj, prop, arr) {
 	Object.defineProperty(obj, prop, descriptor);
 };
 
-let Lexer = {
+let Lexer {
 	public rules = [
 		'a' = 'val a',
 		b = 'val b',
 		(r'c') = 'val c'
 	];
 	public Dynamic:state = [
-		get = {
+		get {
 			if (stateChain.length is 0) {
 				return 0;
 			};
 			return stateChain[stateChain.length - 1];
 		},
-		set = func(newVal) {
+		set (newVal) {
 			console.log("state setter", newVal);
 			if (rules has newVal) {
 				console.log("pushing rule..");

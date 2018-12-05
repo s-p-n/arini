@@ -99,6 +99,10 @@ class Scope extends Api {
 			self.createReference(result, prop, f);
 			return result[prop] = val;
 		};
+		if (f.name !== "") {
+			Object.defineProperty(result, "name", {value: f.name});
+		}
+
 		define("_hasReturn", hasReturn);
 		define("_isScope", true);
 		define("_parent", self._scoping);
