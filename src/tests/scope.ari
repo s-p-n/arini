@@ -39,9 +39,10 @@ let test3 = {
             console.log("clicked");
         }
     ];
-    let t = Tag();
-    t.create(attr);
-    t.tag.attributes.onclick();
+    //let t = Tag();
+    console.log(attr);
+    //t.create(attr);
+   // t.tag.attributes.onclick();
 };
 
 let test4 = {

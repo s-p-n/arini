@@ -6,6 +6,7 @@ let tests = [
 
 		// string number
 		console.log(scope.getType(foo), scope.getType(bar));
+		
 		// "im foo", NaN
 		console.log(foo, bar);
 
@@ -17,7 +18,42 @@ let tests = [
 
 		// "42", 24
 		console.log(foo, bar);
+	},
+	{
+		let Reference (obj, prop, target) {
+			Object.defineProperty(obj, prop, [
+				enumerable = true,
+				get {
+					return obj[target];
+				},
+				set (val) {
+					return obj[target] = val;
+				}
+			]);
+		};
+		let foo = "im foo";
+		let Reference:bar = "foo";
+		console.log(foo, bar);
+
+		bar = "im bar";
+		console.log(foo, bar);
+	},
+	{
+		let Dynamic (obj, prop, arr) {
+			
+			console.log(arr);
+			Object.defineProperty(obj, prop, arr);
+		};
+
+		let Dynamic:always1 = [
+			foo = 1
+		];
+		console.log(always1);
+		always1 = 12;
+		console.log(always1);
 	}
 ];
 
 tests[0]();
+tests[1]();
+tests[2]();

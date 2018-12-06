@@ -22,6 +22,18 @@ let Dynamic (obj, prop, arr) {
 	Object.defineProperty(obj, prop, descriptor);
 };
 
+let Reference (obj, prop, target) {
+	Object.defineProperty(obj, prop, [
+		enumerable = true,
+		get {
+			return obj[target];
+		},
+		set (val) {
+			return obj[target] = val;
+		}
+	]);
+};
+/*
 let Lexer {
 	public rules = [
 		'a' = 'val a',
@@ -53,3 +65,23 @@ let Lexer {
 
 let l = Lexer();
 console.log(l);
+*/
+
+
+let foo = "im foo";
+let Reference:bar = "foo";
+console.log(foo, bar);
+
+bar = "im bar";
+console.log(foo, bar);
+
+/*
+let Dynamic:always1 = [
+	value = 1,
+	writable = false,
+	configurable = false
+];
+console.log(always1);
+always1 = 12;
+console.log(always1);
+*/
