@@ -26,7 +26,7 @@ let macros = {
 	cwd: process.cwd(),
 	include ({file}) {
 		let p;
-		if (file[0] !== "/") {
+		if (!/^\/|[A-Z]\:\\/.test(file)) {
 			p = path.join(this.cwd, file);
 		} else {
 			p = file;
@@ -48,7 +48,8 @@ function parseMacros(code) {
 	function getAttributesObj (attributes) {
 		let obj = Object.create(null);
 		attributes.replace(attrSearch, function (fullMatch, name, value) {
-			obj[name] = JSON.parse(value);
+			console.log(value);
+			obj[name] = value.substr(1,value.length - 2);
 			return "";
 		});
 		return obj;
