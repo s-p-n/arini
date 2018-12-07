@@ -39,14 +39,19 @@ let tests = [
 		console.log(foo, bar);
 	},
 	{
-		let Dynamic (obj, prop, arr) {
-			
+		let Dynamic = func(obj, prop, arr) {
+			let descriptor = [
+				enumerable = true,
+				configurable = true,
+				...arr
+			];
 			console.log(arr);
-			Object.defineProperty(obj, prop, arr);
+			Object.defineProperty(obj, prop, descriptor);
 		};
 
 		let Dynamic:always1 = [
-			foo = 1
+			value = 1,
+			writable = false
 		];
 		console.log(always1);
 		always1 = 12;

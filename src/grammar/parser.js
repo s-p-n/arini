@@ -1173,12 +1173,17 @@ performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
 	yy.setStr = function setStr(body, txt) {
 		return body + txt;
 	};
+	//console.log(this);
 
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
 case 0:/* skip whitespace */
 break;
 case 1:
+												if (this.topState() === "declLeft") {
+													console.log("\n\n\nEurika!\n\n\n");
+													this.popState();
+												}
 											 	yy.scope.beginParen();
 											 	yy.scope.endParen(true);
 											 	this.pushState('controlCode');
@@ -1193,12 +1198,17 @@ break;
 case 3:this.popState();return 15;
 break;
 case 4:
+												if (this.topState() === "declLeft") {
+													console.log("\n\n\nEurika!\n\n\n");
+													this.popState();
+												}
 												this.pushState('paren');
 												yy.scope.beginParen();
 												return "(";
 											 
 break;
 case 5:
+
 												this.popState();
 												this.pushState("controlCode");
 												return "){";
@@ -1305,6 +1315,7 @@ break;
 case 33:this.popState();return 7;
 break;
 case 34:
+												 console.log("\n\n\nEXPR BRACKET FOUND\n\n\n");
                                                  for (let [search, result] of yy.namedTokens) {
                                                  	if (search.test(yy_.yytext)) {
                                                  		if (typeof result === "function") {
@@ -1344,6 +1355,11 @@ case 35:
                                             
 break;
 case 36:
+												if (this.topState() === "declLeft") {
+													console.log("\n\n\nEurika!\n\n\n");
+													console.log(this);
+													this.popState();
+												}
 												this.pushState("controlCode");
 												return "{";
 											 
@@ -1406,6 +1422,10 @@ case 59:
                                                  }
                                                  if (!(/\-/).test(yy_.yytext)) {
                                                  	return "JSPROPERTY";
+                                                 }
+                                                 if (yy_.yytext === "id") {
+                                                 	console.log(this);
+                                                 	process.exit();
                                                  }
                                                  return "PROPERTY";
                                              
