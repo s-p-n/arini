@@ -45,7 +45,6 @@ let tests = [
 				configurable = true,
 				...arr
 			];
-			console.log(arr);
 			Object.defineProperty(obj, prop, descriptor);
 		};
 
@@ -56,9 +55,39 @@ let tests = [
 		console.log(always1);
 		always1 = 12;
 		console.log(always1);
+	},
+	{
+		let Dynamic = func(obj, prop, arr) {
+			let descriptor = [
+				enumerable = true,
+				configurable = true,
+				...arr
+			];
+			Object.defineProperty(obj, prop, descriptor);
+		};
+
+		let Person {
+
+			let realAge = 0;
+			public Dynamic:age = [
+				get {
+					return realAge;
+				},
+				set (newAge) {
+					if (0 <= newAge <= 150) {
+						return realAge = newAge;
+					};
+				}
+			];
+		};
+		let sam = Person();
+		console.log(sam, sam.age);
+		sam.age = 425;
+		console.log(sam, sam.age);
 	}
 ];
 
 tests[0]();
 tests[1]();
 tests[2]();
+tests[3]();

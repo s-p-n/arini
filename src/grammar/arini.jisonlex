@@ -82,7 +82,7 @@
 													this.match += '=';
 													this.matched += '=';
 													this._input = this._input.substr(1);
-													return "LTEQ"
+													return "SIZECMP"
 												} else if ((/^\-/).test(this._input)) {
 													yytext += "-";
 													this.match += '-';
@@ -90,7 +90,7 @@
 													this._input = this._input.substr(1);
 													return "BY";
 												}
-												return "LT";
+												return "SIZECMP";
 											 }
 
 <angleBracket>"/"                            {this.popState(); this.pushState("xmlBlockClose"); return "XML_BLOCK_END";}
@@ -197,8 +197,8 @@ r(?:\'\'\'|\"\"\"|[/"'@~%`])      		 	%{
 ".."                                         {return "TO";}
 \"(\\\"|[^\"])*\"                            {return "QSTRING";}
 \'(\\\'|[^\'])*\'                            {return "ASTRING";}
-">"                                          {return "GT";}
-">="                                         {return "GTEQ";}
+">"                                          {return "SIZECMP";}
+">="                                         {return "SIZECMP";}
 "=="                                         {return "EQ";}
 "!="                                         {return "INEQ";}
 "&&"                                         {return "AND";}

@@ -1,6 +1,6 @@
 %left BECOMES XML_ATTR_BECOMES
 %left AND OR
-%left EQ INEQ GTEQ LTEQ GT LT
+%left EQ INEQ SIZECMP
 %left IN HAS FROM
 %left TO
 %left BY
@@ -109,15 +109,14 @@ attributeList
 		}
 	;
 
+binarySizeCmp
+	: expr[a] SIZECMP expr[b]
+		{$$ = `scope.sizeCmp(${$a}, ${$b}, "${$SIZECMP}")`;}
+	;
+
 binaryExpr
-	: expr[a] LT expr[b]
-		{$$ = `(${$a}<${$b})`;}
-	| expr[a] LTEQ expr[b]
-		{$$ = `(${$a}<=${$b})`;}
-	| expr[a] GT expr[b]
-		{$$ = `(${$a}>${$b})`;}
-	| expr[a] GTEQ expr[b]
-		{$$ = `(${$a}>=${$b})`;}
+	: binarySizeCmp
+		{$$ = $binarySizeCmp;}
 	| expr[a] EQ expr[b]
 		{$$ = `Object.is(${$a},${$b})`;}
 	| expr[a] INEQ expr[b]
@@ -346,7 +345,7 @@ ifStmtEnd
 
 ifStmtLineStart
 	: 'IF(' expr ')'
-		{$$ = `if(${$expr})`;}
+		{$$ = `if(scope.toBoolean(${$expr}))`;}
 	;
 
 invokeArgs

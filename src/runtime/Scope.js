@@ -409,6 +409,48 @@ class Scope extends Api {
 		return obj[prop] = val;
 	}
 
+	sizeCmp (a, b, op) {
+		/* The reason I do it this way instead of just spitting raw 'expr < expr',
+			is to allow for chaining. 1 < 2 < 3 < 4 < 5; // true
+		*/
+		console.log(a, b, op);
+		let bool = false;
+		switch (op) {
+			case '<':
+				bool = a < b;
+				break;
+			case '>':
+				bool = a > b;
+				break;
+			case '<=':
+				bool = a <= b;
+				break;
+			case '>=':
+				bool = a >= b;
+				break;
+		}
+		console.log("Creating sizeCmp obj:", a, b, op, bool);
+		return {
+			[Symbol.toPrimitive](hint) {
+				console.log("hint", hint);
+				 if (hint === "number") {
+				 	return +b;
+				 }
+				 return bool;
+			}
+		}
+	}
+
+	toBoolean (val) {
+		if (val) {
+			if (val == false) {
+				return false;
+			}
+			return true;
+		}
+		return false
+	}
+
 	unpack (list=[]) {
 		const self = this;
 		let result = Object.create(null);
