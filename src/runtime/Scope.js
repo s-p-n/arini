@@ -13,17 +13,17 @@ class Scope extends Api {
 	constructor () {
 		super();
 		const self = this;
-		self._scoping = {
-			let: self.map(),
-			private: self.map(),
-			protected: self.map(),
-			public: self.map(),
-			parent: null
-		};
+		self._scoping = self.map([
+			["let", self.array()],
+			["private", self.array()],
+			["protected", self.array()],
+			["public", self.array()],
+			["parent", null]
+		]);
 
 		function getId(prop, ctx) {
 			for (let slot in ctx) {
-				if (slot === "parent" || typeof ctx[slot].has !== "function") {
+				if (slot === "parent" || self.getType(ctx[slot]) !== "array") {
 					continue;
 				}
 				if (prop in ctx[slot]) {
@@ -38,10 +38,10 @@ class Scope extends Api {
 
 		function setId(prop, value, ctx) {
 			for (let slot in ctx) {
-				if (slot === "parent" || typeof ctx[slot].has !== "function") {
+				if (slot === "parent" || self.getType(ctx[slot]) !== "array") {
 					continue;
 				}
-				if (ctx[slot].has(prop)) {
+				if (prop in ctx[slot]) {
 					return ctx[slot][prop] = value;
 				}
 			}
@@ -240,6 +240,9 @@ class Scope extends Api {
 	}
 
 	getType (expr) {
+		if (typeof expr === "undefined") {
+			return "undefined";
+		}
 		if (expr instanceof Array) {
 			return "array";
 		}
@@ -269,26 +272,26 @@ class Scope extends Api {
 		scoping = self._scoping;
 		
 		if (config.function === undefined) {
-			throw new Error(`Call to undefined scope`);
+			throw new Error(`Call to undefined expression`);
 		}
-		self._scoping = {
-			let: self.map(),
-			private: self.map(),
-			protected: self.map(),
-			public: self.map(),
-			parent: config.function._parent
-		};
-		
+		self._scoping = self.map([
+			["let", self.array()],
+			["private", self.array()],
+			["protected", self.array()],
+			["public", self.array()],
+			["parent", config.function._parent]
+		]);
+
 		result = config.function.apply(config.context, config.arguments);
 		//console.log("scoping:");
 		//console.log(self._scoping);
 
 		if (result === undefined) {
 			if (config.isExtension === true) {
-				result = self.map(
+				result = self.map([
 					["public", self._scoping.public],
 					["protected", self._scoping.protected]
-				);
+				]);
 			} else {
 				result = self._scoping.public;
 			}
@@ -298,9 +301,13 @@ class Scope extends Api {
 		return result;
 	}
 
-	map (items) {
+	map (items=[]) {
 		const self = this;
-		return associativeMap(items);
+		let arr = [];
+		for (let [name, val] of items) {
+			arr[name] = val;
+		}
+		return self.array(arr);
 	}
 
 	random (n=1) {
@@ -399,9 +406,6 @@ class Scope extends Api {
 			if (slot === "parent") {
 				return self.set(obj.parent, prop, val);
 			}
-			if (obj[slot].has(prop)) {
-				return obj[slot][prop] = val;
-			}
 			if (prop in obj[slot]) {
 				return obj[slot][prop] = val;
 			}
@@ -470,6 +474,49 @@ class Scope extends Api {
 			}
 		}
 		return result;
+	}
+
+	use (
+		scope,
+		as, 
+		only,
+		args = []
+	) {
+		const self = this;
+		let result;
+		let container;
+		if (self.getType(scope) !== "function") {
+			// this is bad- trying to use something that isn't a function is illogical.. should we error?
+			console.log("attempting to use non-function");
+			process.exit(1);
+			return;
+		}
+		if (scope._isScope) {
+			scope._beingUsed = true;
+			result = scope(...args);
+		} else {
+			let properties = Object.getOwnPropertyDescriptors(scope.prototype);
+			//console.log(properties);
+			//console.log([...Object.entries(properties)]);
+			result = self.map([
+				["public", []],
+				["protected", []]
+			]);
+			Object.defineProperties(result.public, properties);
+			//console.log(result);
+		}
+		if (self.getType(as) === "undefined") {
+			container = self._scoping;
+		} else {
+			self.declare("let", as);
+			container = self.id[as];
+		}
+		if (self.getType(only) === "undefined") {
+			container.public = result.public;
+			container.protected = result.protected;
+			//self.shallowClone(container.public, result.public);
+			//self.shallowClone(container.protected, result.protected);
+		}
 	}
 
 	wait (seconds) {

@@ -1,0 +1,42 @@
+let tests = [{
+	// Intended use:
+
+	let foo {
+		protected name = "Brian";
+		public sayHi {
+			console.log(`Hello, my name is ${name}`);
+		};
+	};
+
+	let bar {
+		use foo;
+		public setName (newName) {
+			name = newName;
+		};
+	};
+
+	let p = bar();
+	console.log(p);
+	p.sayHi();
+	p.setName("Steve");
+	p.sayHi();
+}, {
+	// Working with Native JS:
+
+	let a = {
+		use Array;
+	};
+
+	let o = {
+		use Object;
+	};
+
+	let xr = {
+		use XRegExp;
+	};
+	console.log('a', a(1,2,3));
+	console.log('o', o());
+	console.log('xr', xr("[a-z]"));
+}];
+tests[0]();
+tests[1]();

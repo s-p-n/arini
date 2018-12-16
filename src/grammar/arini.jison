@@ -213,6 +213,8 @@ declaration
 		{$$ = `scope.declare("protected", ${$decProperty})`;}
 	| PUBLIC decProperty
 		{$$ = `scope.declare("public", ${$decProperty})`;}
+	| USE property
+		{$$ = `scope.use(scope.id["${$property}"])`;}
 	;
 
 decProperty

@@ -82,7 +82,7 @@ let tests = [
 		};
 		let sam = Person();
 		console.log(sam, sam.age);
-		sam.age = 425;
+		sam.age = 125;
 		console.log(sam, sam.age);
 	}
 ];
