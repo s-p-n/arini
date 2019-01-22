@@ -178,8 +178,8 @@ cast
 					}
 				}
 
-				console.log("got cast:");
-				console.log(`${t}:`);
+				//console.log("got cast:");
+				//console.log(`${t}:`);
 				return `scope.id.${t}`;
 			}());
 		%}
@@ -455,8 +455,8 @@ scope
 scopeDecl
 	: scopeDeclStart codeBlock '}'
 		%{
-			console.log("scopeDecl:");
-			console.log($scopeDeclStart);
+			//console.log("scopeDecl:");
+			//console.log($scopeDeclStart);
 			$$ = {
 				name: $scopeDeclStart.name,
 				expr: 
@@ -733,7 +733,7 @@ tagBlockStart
 			$$ = (function () {
 				let parent = yy.scope;
 				yy.scope.begin();
-				console.log($XML_OPEN_ID, yy.scope.expressions);
+				//console.log($XML_OPEN_ID, yy.scope.expressions);
 				return new yy.xml.Tag($XML_OPEN_ID, $attributeList, yy.scope.expressions, parent);
 			}());
 		}

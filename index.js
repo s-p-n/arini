@@ -1,1 +1,1 @@
-module.exports = require("./lib/grammar/grammar.js");
+module.exports = new (require("./src/grammar/grammar.js"))(require('./src/runtime/runtime.js'));

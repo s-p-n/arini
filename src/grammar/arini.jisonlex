@@ -28,7 +28,7 @@
 \s+                                          {/* skip whitespace */}
 "("\s*")"\s*"{"                              {
 												if (this.topState() === "declLeft") {
-													console.log("\n\n\nEurika!\n\n\n");
+													//console.log("\n\n\nEurika!\n\n\n");
 													this.popState();
 												}
 											 	yy.scope.beginParen();
@@ -43,7 +43,7 @@
 <ifParen>')'                                 {this.popState();return ')';}
 "("                                          {
 												if (this.topState() === "declLeft") {
-													console.log("\n\n\nEurika!\n\n\n");
+													//console.log("\n\n\nEurika!\n\n\n");
 													this.popState();
 												}
 												this.pushState('paren');
@@ -141,7 +141,7 @@ r(?:\'\'\'|\"\"\"|[/"'@~%`])      		 	%{
 '['                                         {this.pushState("exprBracket");return '[';}
 <exprBracket>']'                            {this.popState();return ']';}
 <exprBracket>[a-z][a-z0-9\-\_\$]*           {
-												 console.log("\n\n\nEXPR BRACKET FOUND\n\n\n");
+												 //console.log("\n\n\nEXPR BRACKET FOUND\n\n\n");
                                                  for (let [search, result] of yy.namedTokens) {
                                                  	if (search.test(yytext)) {
                                                  		if (typeof result === "function") {
@@ -182,8 +182,8 @@ r(?:\'\'\'|\"\"\"|[/"'@~%`])      		 	%{
 
 "{"                                          {
 												if (this.topState() === "declLeft") {
-													console.log("\n\n\nEurika!\n\n\n");
-													console.log(this);
+													//console.log("\n\n\nEurika!\n\n\n");
+													//console.log(this);
 													this.popState();
 												}
 												this.pushState("controlCode");
@@ -227,7 +227,7 @@ r(?:\'\'\'|\"\"\"|[/"'@~%`])      		 	%{
                                                  	return "JSPROPERTY";
                                                  }
                                                  if (yytext === "id") {
-                                                 	console.log(this);
+                                                 	//console.log(this);
                                                  	process.exit();
                                                  }
                                                  return "PROPERTY";

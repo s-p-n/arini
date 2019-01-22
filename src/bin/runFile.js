@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
 const inputFile = process.argv[2];
-
+const option = process.argv[3];
+//console.log(process.argv);
+//process.exit();
 if (typeof inputFile === "undefined") {
 	require('./interactive.js');
 } else {
@@ -13,31 +15,35 @@ if (typeof inputFile === "undefined") {
 	const Grammar = require('../grammar/grammar.js');
 
 	async function setupParser() {
-		console.log("setting up parser.");
+		//console.log("setting up parser.");
 		let p = await new Grammar(runtime);
-		console.log("parser setup.");
+		//console.log("parser setup.");
 		return p;
 	}
 
 	async function getFile() {
-		console.log(`Looking up ${file}..`);
+		//console.log(`Looking up ${file}..`);
 		if (!(await fs.existsSync(file))) {
-			console.log(`Error: Cannot find ${file}`);
+			//console.log(`Error: Cannot find file: ${file}`);
 			process.exit(1);
 		}
-		console.log(`Found ${file}`);
+		//console.log(`Found ${file}`);
 		let contents = await fs.readFileSync(file, "utf8");
-		console.log("Got file contents.");
+		//console.log("Got file contents.");
 		return contents; 
 	}
 
-	console.log("Reading file and setting up parser..");
+	//console.log("Reading file and setting up parser..");
 	Promise.all([setupParser(), getFile()]).then(setup => {
 		let [parser, code] = setup;
-		console.log("Setup complete.");
-		console.log("Executing file.");
+		//console.log("Setup complete.");
+		//console.log("Executing file.");
 		parser.parse(code);
+		
+		if (option === "--fork") {
+			process.send({code: parser.yy.scope.toJS()});
+			process.exit(0);
+		}
 		parser.eval();
-		process.exit(0);
 	});
 }

@@ -1,0 +1,23 @@
+
+
+let dirs = [
+    src     = './src',
+    expect  = './expect'
+];
+
+let srcDirLoader = scope.require(dirs.src);
+let expectDirLoader = scope.require(dirs.expect);
+
+Promise.all([srcDirLoader, expectDirLoader]).then(func(files) {
+    let results = [];
+    let [srcFiles, expectFiles] = files;
+
+    expectFiles.forEach(func (expectationShell, i) {
+        let expect = expectationShell();
+        let value = srcFiles[i]();
+
+        results[] = expect(value);
+    });
+
+    console.log(results);
+});

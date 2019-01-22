@@ -48,13 +48,18 @@ let tests = [
 			Object.defineProperty(obj, prop, descriptor);
 		};
 
-		let Dynamic:always1 = [
-			value = 1,
-			writable = false
-		];
-		console.log(always1);
-		always1 = 12;
-		console.log(always1);
+		//let Dynamic:always1 = [
+		//	value = 1,
+		//	writable = false
+		//];
+		//always1 = 12; //error!
+
+let Dynamic:always1 = [
+    get {return 1;},
+    set {}
+];
+always1 = 3;
+console.log(always1); // 1
 	},
 	{
 		let Dynamic = func(obj, prop, arr) {
@@ -74,7 +79,7 @@ let tests = [
 					return realAge;
 				},
 				set (newAge) {
-					if (0 <= newAge <= 150) {
+					if (0 <= newAge <= 120) {
 						return realAge = newAge;
 					};
 				}
@@ -83,6 +88,8 @@ let tests = [
 		let sam = Person();
 		console.log(sam, sam.age);
 		sam.age = 125;
+		console.log(sam, sam.age);
+		sam.age = 60;
 		console.log(sam, sam.age);
 	}
 ];

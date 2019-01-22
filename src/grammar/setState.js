@@ -48,7 +48,7 @@ function parseMacros(code) {
 	function getAttributesObj (attributes) {
 		let obj = Object.create(null);
 		attributes.replace(attrSearch, function (fullMatch, name, value) {
-			console.log(value);
+			//console.log(value);
 			obj[name] = value.substr(1,value.length - 2);
 			return "";
 		});
@@ -81,13 +81,22 @@ module.exports = function setState (parser, runtime={}) {
 	// Run all preloads (from the preloads directory).
 	for (let [,prep] of preloads) prep(parser);
 
-	parser.eval = function () {
+	parser.eval = function (name="shell") {
 		let code = `[${Object.keys(runtime).join(',')}]=[${Object.values(runtime).join(',')}];`;
 		let processedArini = parser.yy.scope.toJS();
 		code += `module.exports = (function () {${processedArini}}());`;
-		console.log(processedArini);
 		code = parseMacros(code);
-		return requireFromString(code, "shell");
+		console.log(code);
+		return requireFromString(code, name);
+	}
+
+	parser.require = function (f) {
+		let g = require('./grammar.js');
+		let r = require('../runtime/runtime.js');
+		let p = new g(r);
+		let code = fs.readFileSync(f);
+		p.parse(code);
+		return p.eval(f);
 	}
 
 	parser.yy.parseError = function (str="", hash={

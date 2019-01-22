@@ -1,0 +1,29 @@
+let expected = [ 'Hello, I\'m foo.',
+  'I \'m a string too',
+  'I\'m a string including 2 more strings.\n\nThe strings are:\nfoo: "Hello, I\'m foo."\nbar: "I \'m a string too"\n' ];
+let log (msg = "") {
+	console.log("'expect/strings.ari' message: ", msg);	
+};
+
+return func(value = []) {
+	if (value.length isnt expected.length) {
+		log("bad length");
+		console.log(value.length, expected.length);
+		return false;
+	};
+	if (value[0] isnt expected[0]) {
+		log(`0 index mismatch: ${value[0]}, ${expected[0]}`);
+		return false;
+	};
+	if (value[1] isnt expected[1]) {
+		log(`1 index mismatch: ${value[1]}, ${expected[1]}`);
+		return false;
+	};
+	if (value[2] isnt expected[2]) {
+		log(`2 index mismatch: ${value[2]}, ${expected[2]}`);
+		return false;
+	};
+
+	log("passed.");
+	return true;
+};
