@@ -194,6 +194,7 @@ r(?:\'\'\'|\"\"\"|[/"'@~%`])      		 	%{
 												return "}";
 											 }
 "}"                                          {return "}";}
+"#"											 {return "FUNCTION";}
 ".."                                         {return "TO";}
 \"(\\\"|[^\"])*\"                            {return "QSTRING";}
 \'(\\\'|[^\'])*\'                            {return "ASTRING";}
