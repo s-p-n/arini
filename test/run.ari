@@ -3,20 +3,22 @@ let dirs = [
     expect  = './expect'
 ];
 
-let srcDirLoader    = scope.require(dirs.src);
-let expectDirLoader = scope.require(dirs.expect);
+let srcDirLoader    = scope.compile(dirs.src);
+let expectDirLoader = scope.compile(dirs.expect);
 
 Promise.all([srcDirLoader, expectDirLoader])
 .then(#(files) {
     let results = [];
     let [srcFiles, expectFiles] = files;
 
-    expectFiles.forEach(#(expectationShell, i) {
-        let expect = expectationShell();
-        let value = srcFiles[i]();
+    expectFiles.forEach(#(expect, i) {
+        let value = srcFiles[i];
 
         results[] = expect(value);
     });
 
     console.log(results);
+})
+.catch(#(err) {
+    console.log(err);
 });

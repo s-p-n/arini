@@ -4,9 +4,15 @@ if (typeof window !== "undefined") {
     window["global"] = window;
   }
 }
-Object.prototype.compare = function compare (b) {
-	return Object.keys(this).every(key => this[key] === b[key]);
-};
+Object.defineProperty(Object.prototype, "compare", {
+	enumerable: false,
+	configurable: true,
+	writable: true,
+	value: function compare (b) {
+		return Object.keys(this).every(key => this[key] === b[key]);
+	}
+});
+
 const Api = <include file="./Api.js"/>;
 const Node = <include file="./Node.js"/>;
 const TextNode = <include file="./TextNode.js"/>;

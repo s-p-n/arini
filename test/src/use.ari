@@ -1,0 +1,24 @@
+let test = {
+	// Intended use:
+
+	let Foo {
+		protected name = "Brian";
+		public sayHi {
+			return `Hello, my name is ${name}`;
+		};
+	};
+
+	let Bar {
+		use Foo;
+		public setName (newName) {
+			name = newName;
+		};
+	};
+	let results = [];
+	let p = Bar();
+	results[] = (p.sayHi());
+	p.setName("Steve");
+	results[] = (p.sayHi());
+	return results;
+}();
+return test;
