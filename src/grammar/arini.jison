@@ -10,7 +10,7 @@
 %left '.' PROPERTY JSPROPERTY
 %left NAME
 
-%right UMINUS INCREMENT DECREMENT RANDOM SPREAD
+%right UMINUS INCREMENT DECREMENT RANDOM SPREAD AWAIT NOT
 %right BT_EXPR_OPEN BT_EXPR_CLOSE '{' '}' '){' '(){'
 %right '[' ']'
 %right '(' ')' 
@@ -751,6 +751,10 @@ unaryExpr
 		{$$ = '++' + $expr;}
 	| DECREMENT expr
 		{$$ = '--' + $expr;}
+	| AWAIT expr
+		{$$ = `await ${$expr}`;}
+	| NOT expr
+		{$$ = '!' + $expr;}
 	;
 
 unpackExpr

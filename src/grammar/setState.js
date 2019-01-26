@@ -84,9 +84,9 @@ module.exports = function setState (parser, runtime={}) {
 	parser.eval = function (name="shell") {
 		let code = `[${Object.keys(runtime).join(',')}]=[${Object.values(runtime).join(',')}];`;
 		let processedArini = parser.yy.scope.toJS();
-		code += `module.exports = (function () {${processedArini}}());`;
+		code += `module.exports = (async function () {${processedArini}}());`;
 		code = parseMacros(code);
-		console.log(code);
+		//console.log(code);
 		return requireFromString(code, name);
 	}
 

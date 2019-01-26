@@ -1,1 +1,13 @@
-return [ 'Hello, my name is Brian', 'Hello, my name is Steve' ].compare;
+let expected = [[ 'Hello, my name is Brian', 'Hello, my name is Steve' ]];
+//console.log("expected", expected);
+return #(value) {
+	//console.log("use expect:", value);
+	if (!value[0].compare(expected[0])) {
+		return false;
+	};
+	//console.log(value[1].getAllProps());
+	if (value[1] isnt value[1].getAllProps()['public']) {
+		return false;
+	};
+	return true;
+};

@@ -2,7 +2,10 @@
 
 const inputFile = process.argv[2];
 const option = process.argv[3];
-//console.log(process.argv);
+const debug = (...args) => {
+	//return console.log(...args);
+};
+debug("runFile.js:", process.argv, inputFile, option);
 //process.exit();
 if (typeof inputFile === "undefined") {
 	require('./interactive.js');
@@ -10,40 +13,45 @@ if (typeof inputFile === "undefined") {
 	const path = require('path');
 	const fs = require('fs');
 	const cwd = process.cwd();
-	const file = path.join(cwd, inputFile);
+	const file = path.isAbsolute(inputFile) ? inputFile : path.join(cwd, inputFile);
 	const runtime = require('../runtime/runtime.js');
 	const Grammar = require('../grammar/grammar.js');
 
 	async function setupParser() {
-		//console.log("setting up parser.");
+		debug("setting up parser.");
 		let p = await new Grammar(runtime);
-		//console.log("parser setup.");
+		debug("parser setup.");
 		return p;
 	}
 
 	async function getFile() {
-		//console.log(`Looking up ${file}..`);
+		//debug(`Looking up ${file}..`);
 		if (!(await fs.existsSync(file))) {
-			//console.log(`Error: Cannot find file: ${file}`);
+			debug(`Error: Cannot find file: ${file}`);
 			process.exit(1);
 		}
-		//console.log(`Found ${file}`);
+		debug(`Found ${file}`);
 		let contents = await fs.readFileSync(file, "utf8");
-		//console.log("Got file contents.");
+		debug("Got file contents.");
 		return contents; 
 	}
 
-	//console.log("Reading file and setting up parser..");
-	Promise.all([setupParser(), getFile()]).then(setup => {
+	debug("Reading file and setting up parser..");
+	Promise.all([setupParser(), getFile()]).
+	then(setup => {
 		let [parser, code] = setup;
-		//console.log("Setup complete.");
-		//console.log("Executing file.");
+		debug("Setup complete.");
+		debug("Executing file.");
 		parser.parse(code);
 		
 		if (option === "--fork") {
+			debug("forking...");
 			process.send({code: parser.yy.scope.toJS()});
-			process.exit(0);
+		} else {
+			parser.eval();
 		}
-		parser.eval();
+	}).catch(err => {
+		console.error("got error");
+		process.exit(1);
 	});
 }

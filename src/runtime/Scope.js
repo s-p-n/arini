@@ -13,6 +13,8 @@ Object.defineProperty(Object.prototype, "compare", {
 	}
 });
 
+const path = require('path');
+
 const Api = <include file="./Api.js"/>;
 const Node = <include file="./Node.js"/>;
 const TextNode = <include file="./TextNode.js"/>;
@@ -40,6 +42,15 @@ class Scope extends Api {
 				}
 			}
 			if (ctx.parent === null) {
+				if (prop === "require") {
+					return require;
+				}
+				if (prop === "__dirname") {
+					return path.dirname(path.join(process.cwd(), process.argv[2]));
+				}
+				if (prop === "async") {
+					return self.async;
+				}
 				return global[prop];
 			}
 			return getId(prop, ctx.parent);
@@ -91,6 +102,10 @@ class Scope extends Api {
 
 
 		return expr;
+	}
+
+	async async(f) {
+		return new Promise(f);
 	}
 
 	createScope (f, hasReturn) {

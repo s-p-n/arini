@@ -3,18 +3,38 @@ const fs = require("fs");
 const path = require("path");
 const util = require("util");
 const child_process = require("child_process");
-
+const runFile = path.join(process.cwd(), "../src/bin/runFile.js");
+const debug = (...args) => {
+	//return console.log(...args);
+};
 async function getTranslation (file) {
-	const n = child_process.fork("../src/bin/runFile.js", [file, '--fork']);
+	const filename = path.isAbsolute(file) ? file : path.join(process.cwd(), file);
+	const n = child_process.fork(runFile, [filename, '--fork']);
 	n.on[util.promisify.custom] = function () {
 		return new Promise((resolve, reject) => {
 			let t = setTimeout(() => {
 				reject('timeout');
 			}, 10000);
-
-			n.on('message', m => {
+			debug(`Awaiting code for file: ${filename}`);
+			n.on('message',async (m) => {
 				clearTimeout(t);
-				resolve(eval(`scope.createScope(function (...args) {${m.code}})()`));
+				let cwd = process.cwd();
+				process.chdir(path.dirname(filename));
+				try {
+					let result;
+					let prefix = '';
+					if (m.code.indexOf("await ") !== -1) {
+						debug(" await found.");
+						prefix = "async ";
+					}
+					result = eval(`scope.createScope(${prefix}function (...args) {${m.code}})()`);
+					debug(`got result for ${filename}`);
+					//debug(result);
+					resolve(result);
+				} catch (err) {
+					reject(err);
+				}
+				process.chdir(cwd);
 			});
 		});
 	};
@@ -56,25 +76,30 @@ class Api {
 		//}
 	}
 
-	compile (file) {
+	async compile (file) {
+		debug(file);
 		if (!fs.existsSync(file)) {
-			return false;
+			throw new Error(`compile error: File not found: '${file}'`);
 		}
 		let stats = fs.lstatSync(file);
 		if (stats.isDirectory()) {
-			console.log("is a dir");
+			debug("is a dir");
 			let dir = fs.readdirSync(file);
-			console.log(dir);
-			return Promise.all(dir.map(f=>this.compile(path.join(file, f))));
+			debug(dir);
+			let result = await Promise.all(dir.map((f)=>{
+				return this.compile(path.join(file, f));
+			}));
+			
+			return result;
 		}
 		if (!stats.isFile()) {
-			console.log("Not a file..");
+			throw new Error("Not a file..");
 			return false;
 		}
-		console.log('found file');
+		debug('found file');
 		
 		
-		return getTranslation(file);
+		return await getTranslation(file);
 	}
 }
 

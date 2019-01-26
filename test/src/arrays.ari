@@ -14,5 +14,4 @@ bar.splice(0,2); // remove first 2 indices: 'b' and 'c'
 
 // join 2 arrays
 baz = foo.concat(bar);
-
 return [foo, bar, baz];

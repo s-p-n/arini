@@ -2,23 +2,11 @@ let dirs = [
     src     = './src',
     expect  = './expect'
 ];
+let [srcFiles, expectFiles] = {console.log("Loading dirs:", dirs);}() and await Promise.all([
+    scope.compile(dirs.src), 
+    scope.compile(dirs.expect)
+]);
 
-let srcDirLoader    = scope.compile(dirs.src);
-let expectDirLoader = scope.compile(dirs.expect);
-
-Promise.all([srcDirLoader, expectDirLoader])
-.then(#(files) {
-    let results = [];
-    let [srcFiles, expectFiles] = files;
-
-    expectFiles.forEach(#(expect, i) {
-        let value = srcFiles[i];
-
-        results[] = expect(value);
-    });
-
-    console.log(results);
-})
-.catch(#(err) {
-    console.log(err);
-});
+console.log(expectFiles.map(#(expect, i) {
+    return expect(srcFiles[i]);
+}));

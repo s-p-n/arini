@@ -215,7 +215,8 @@ r(?:\'\'\'|\"\"\"|[/"'@~%`])      		 	%{
 ","                                          {return ",";}
 "="                                          {return "BECOMES";}
 ":"                                          {return ":";}
-[a-z][a-z0-9\-\_\$]*                         {
+"!"											 {return "NOT";}
+[a-z\_\$][a-z0-9\-\_\$]*                       {
                                                  for (let [search, result] of yy.namedTokens) {
                                                  	if (search.test(yytext)) {
                                                  		if (typeof result === "function") {
