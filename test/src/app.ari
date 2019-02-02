@@ -1,0 +1,13 @@
+let App {
+	let ex = require("express")();
+	let http = require("http");
+	let server;
+	public template = include "app/template.ari";
+	public start = include "app/start.ari";\
+	public setup = include "app/setup.ari";
+};
+
+let app = App();
+
+app.setup();
+app.start();

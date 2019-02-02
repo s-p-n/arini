@@ -5,7 +5,7 @@ class TextNode {
 	}
 
 	toString () {
-		return this.text;
+		return this.value;
 	}
 }
 

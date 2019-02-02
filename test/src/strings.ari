@@ -1,5 +1,5 @@
 let foo = "Hello, I'm foo.";
-let bar = 'I \'m a string too';
+let bar = 'I\'m a string too';
 let baz = `I'm a string including 2 more strings.
 
 The strings are:

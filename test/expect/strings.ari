@@ -1,5 +1,7 @@
-return [
+let expected = [
 	'Hello, I\'m foo.',
-	'I \'m a string too',
-	'I\'m a string including 2 more strings.\n\nThe strings are:\nfoo: "Hello, I\'m foo."\nbar: "I \'m a string too"\n'
-].compare;
+	'I\'m a string too',
+	'I\'m a string including 2 more strings.\n\nThe strings are:\nfoo: "Hello, I\'m foo."\nbar: "I\'m a string too"\n'
+];
+
+return expected.compare.bind(expected);

@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const util = require("util");
 const child_process = require("child_process");
-const runFile = path.join(process.cwd(), "../src/bin/runFile.js");
+const runFile = process.argv[1];
 const debug = (...args) => {
 	//return console.log(...args);
 };
@@ -27,7 +27,7 @@ async function getTranslation (file) {
 						debug(" await found.");
 						prefix = "async ";
 					}
-					result = eval(`scope.createScope(${prefix}function (...args) {${m.code}})()`);
+					result = eval(`scope.createScope(${prefix}function (...args) {this._scoping=scope._scoping;${m.code}})()`);
 					debug(`got result for ${filename}`);
 					//debug(result);
 					resolve(result);

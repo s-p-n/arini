@@ -72,6 +72,7 @@ function requireFromString(src, filename) {
 	const m = new Module(filename, parent);
 	m.filename = filename;
 	m.paths = Module._nodeModulePaths(path.dirname(filename));
+	//console.log(src);
 	m._compile(src, filename);
 	return m.exports;
 }
@@ -81,22 +82,33 @@ module.exports = function setState (parser, runtime={}) {
 	// Run all preloads (from the preloads directory).
 	for (let [,prep] of preloads) prep(parser);
 
-	parser.eval = function (name="shell") {
+	parser.eval = function (name="shell", 
+			prefix="module.exports = (async function(){this._scoping=scope._scoping;", 
+			suffix="}());"
+		) {
 		let code = `[${Object.keys(runtime).join(',')}]=[${Object.values(runtime).join(',')}];`;
 		let processedArini = parser.yy.scope.toJS();
-		code += `module.exports = (async function () {${processedArini}}());`;
+		code += prefix + processedArini + suffix;
 		code = parseMacros(code);
 		//console.log(code);
 		return requireFromString(code, name);
 	}
-
+	parser.include = function (f) {
+		let g = require('./grammar.js');
+		let r = require('../runtime/runtime.js');
+		let p = new g(r);
+		let code = fs.readFileSync(f, "utf8");
+		p.parse(`{${code}}();`);
+		return p.yy.scope.toJS();
+	}
 	parser.require = function (f) {
 		let g = require('./grammar.js');
 		let r = require('../runtime/runtime.js');
 		let p = new g(r);
-		let code = fs.readFileSync(f);
+		let code = fs.readFileSync(f, "utf8");
+		//console.log(code);
 		p.parse(code);
-		return p.eval(f);
+		return p.eval(f, "module.exports=scope.createScope(function(){this._scoping=scope._scoping;", "})()");
 	}
 
 	parser.yy.parseError = function (str="", hash={

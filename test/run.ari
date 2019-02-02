@@ -1,12 +1,14 @@
+let start = Date.now();
 let dirs = [
     src     = './src',
     expect  = './expect'
 ];
-let [srcFiles, expectFiles] = {console.log("Loading dirs:", dirs);}() and await Promise.all([
+let [srcFiles, expectFiles] = {console.log("Loading dirs:", dirs);}() and await (Promise.all([
     scope.compile(dirs.src), 
     scope.compile(dirs.expect)
-]);
-
+]));
+console.log("Results:");
 console.log(expectFiles.map(#(expect, i) {
     return expect(srcFiles[i]);
 }));
+console.log(`Total Operation took ${Date.now() - start}ms.`);

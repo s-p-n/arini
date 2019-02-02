@@ -1,0 +1,9 @@
+return {
+		server = http.createServer(ex).listen(8080, {
+		console.log("Server Started on port 8080");
+	});
+
+	ex.get("/", #(req, res) {
+		res.end(template.toString());
+	});
+};

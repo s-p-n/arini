@@ -1,3 +1,10 @@
+%{
+	const fs = require('fs');
+	const path = require('path');
+	const arini_dir = path.dirname(path.dirname(process.argv[1]));
+	const script_dir = (process.argv[2] !== undefined) ? path.dirname(path.join(process.cwd(), process.argv[2])) : process.cwd();
+%}
+
 %left BECOMES XML_ATTR_BECOMES
 %left AND OR
 %left EQ INEQ SIZECMP
@@ -7,10 +14,10 @@
 %left MINUS PLUS
 %left TIMES DIVIDE MODULUS
 %left POWER
-%left '.' PROPERTY JSPROPERTY
-%left NAME
+%right '.' PROPERTY JSPROPERTY
+%right NAME
 
-%right UMINUS INCREMENT DECREMENT RANDOM SPREAD AWAIT NOT
+%right UMINUS INCREMENT DECREMENT RANDOM SPREAD ASYNC AWAIT NOT INCLUDE
 %right BT_EXPR_OPEN BT_EXPR_CLOSE '{' '}' '){' '(){'
 %right '[' ']'
 %right '(' ')' 
@@ -142,7 +149,7 @@ binaryExpr
 	| expr[a] HAS expr[b]
 		{$$ = `scope.has(${$a}, ${$b})`;}
 	| property BECOMES expr
-		{$$ = `scope.set(scope._scoping,"${$property}",${$expr})`;}
+		{$$ = `scope.set(this._scoping,"${$property}",${$expr})`;}
 	| id BECOMES expr
 		{$$ = `scope.set(${$id.parent},${$id.prop},${$expr})`;}
 	| expr[a] '[' ']' BECOMES expr[b]
@@ -361,9 +368,9 @@ invokeArgs
 
 invokeExpr
 	: expr '(' ')'
-		{$$ = `${$expr}()`;}
+		{$$ = `(${$expr}())`;}
 	| expr '(' invokeArgs ')'
-		{$$ = `${$expr}(${$invokeArgs})`;}
+		{$$ = `(${$expr}(${$invokeArgs}))`;}
 	;
 
 literal
@@ -444,12 +451,29 @@ scope
 		%{
 			$$ = $scopeStart + 
 				'this._hasReturn=true;' + 
+				'this._scoping=scope._scoping;' +
 				yy.scope.toJS() + 
 				';this._hasReturn=false},' + 
 				yy.scope.hasReturn + 
 			')';
 			yy.scope.end();
 		%}
+	| scopeAsyncFlag scopeStart codeBlock '}'
+		%{
+			$$ =$scopeStart + 
+				'this._hasReturn=true;' + 
+				'this._scoping=scope._scoping;' +
+				yy.scope.toJS() + 
+				';this._hasReturn=false},' + 
+				yy.scope.hasReturn + 
+			')';
+			yy.scope.end();
+		%}
+	;
+
+scopeAsyncFlag
+	: ASYNC
+		{yy.scope.setAsync();}
 	;
 
 scopeDecl
@@ -462,6 +486,23 @@ scopeDecl
 				expr: 
 					$scopeDeclStart.expr + 
 					'this._hasReturn=true;' + 
+					'this._scoping=scope._scoping;' +
+					yy.scope.toJS() + 
+					';this._hasReturn=false},' + 
+					yy.scope.hasReturn + 
+				')'
+			};
+			yy.scope.end();
+		%}
+	| scopeAsyncFlag scopeDeclStart codeBlock '}'
+		%{
+			//console.log("scopeDecl:");
+			//console.log($scopeDeclStart);
+			$$ = {
+				name: $scopeDeclStart.name,
+				expr: $scopeDeclStart.expr + 
+					'this._hasReturn=true;' + 
+					'this._scoping=scope._scoping;' +
 					yy.scope.toJS() + 
 					';this._hasReturn=false},' + 
 					yy.scope.hasReturn + 
@@ -477,10 +518,11 @@ scopeDeclStart
 			yy.scope.endParen(true);
 			$$ = (function () {
 				let args = yy.scope.argsDecl;
+				let async = yy.scope.asyncFlag;
 				yy.scope.begin();
 				return {
 					name: $PROPERTY,
-					expr: `scope.createScope(function(...args){${args}`
+					expr: `scope.createScope(${async}function(...args){${args}`
 				};
 			}());
 		%}
@@ -489,10 +531,11 @@ scopeDeclStart
 			yy.scope.endParen(true);
 			$$ = (function () {
 				let args = yy.scope.argsDecl;
+				let async = yy.scope.asyncFlag;
 				yy.scope.begin();
 				return {
 					name: $JSPROPERTY,
-					expr: `scope.createScope(function ${$JSPROPERTY}(...args){${args}`
+					expr: `scope.createScope(${async}function ${$JSPROPERTY}(...args){${args}`
 				};
 			}());
 		%}
@@ -501,13 +544,14 @@ scopeDeclStart
 			yy.scope.endParen(true);
 			$$ = (function () {
 				let args = yy.scope.argsDecl;
+				let async = yy.scope.asyncFlag;
 				let argsLength = yy.scope.argsLength;
 				let spreadProp = $scopeArgumentSpread;
 				let spread = `scope.declare("let", ["${spreadProp}",args.slice(${argsLength})]);`;
 				yy.scope.begin();
 				return {
 					name: $PROPERTY,
-					expr: `scope.createScope(function(...args){${args}${spread}`
+					expr: `scope.createScope(${async}function(...args){${args}${spread}`
 				};
 			}());
 		%}
@@ -516,13 +560,14 @@ scopeDeclStart
 			yy.scope.endParen(true);
 			$$ = (function () {
 				let args = yy.scope.argsDecl;
+				let async = yy.scope.asyncFlag;
 				let argsLength = yy.scope.argsLength;
 				let spreadProp = $scopeArgumentSpread;
 				let spread = `scope.declare("let", ["${spreadProp}",args.slice(${argsLength})]);`;
 				yy.scope.begin();
 				return {
 					name: $JSPROPERTY,
-					expr: `scope.createScope(function ${$JSPROPERTY}(...args){${args}${spread}`
+					expr: `scope.createScope(${async}function ${$JSPROPERTY}(...args){${args}${spread}`
 				};
 			}());
 		%}
@@ -532,10 +577,11 @@ scopeDeclStart
 			$$ = (function () {
 				let spreadProp = $scopeArgumentSpread;
 				let spread = `scope.declare("let", ["${spreadProp}",args]);`;
+				let async = yy.scope.asyncFlag;
 				yy.scope.begin();
 				return {
 					name: $PROPERTY,
-					expr: `scope.createScope(function(...args){${spread}`
+					expr: `scope.createScope(${async}function(...args){${spread}`
 				};
 			}());
 		%}
@@ -545,36 +591,45 @@ scopeDeclStart
 			$$ = (function () {
 				let spreadProp = $scopeArgumentSpread;
 				let spread = `scope.declare("let", ["${spreadProp}",args]);`;
+				let async = yy.scope.asyncFlag;
 				yy.scope.begin();
 				return {
 					name: $JSPROPERTY,
-					expr: `scope.createScope(function ${$JSPROPERTY}(...args){${spread}`
+					expr: `scope.createScope(${async}function ${$JSPROPERTY}(...args){${spread}`
 				};
 			}());
 		%}
 	| property '(){'
 		%{
-			yy.scope.begin();
-			let fnName = $property
-			if (/\-/.test($property)) {
-				fnName = "";
-			}
-			$$ = {
-				name: $property,
-				expr: `scope.createScope(function ${fnName}(){`
-			};
+			$$ = (function () {
+				let async = yy.scope.asyncFlag;
+				yy.scope.begin();
+				let fnName = $property
+				if (/\-/.test($property)) {
+					fnName = "";
+				}
+				return {
+					name: $property,
+					expr: `scope.createScope(${async}function ${fnName}(){`
+				};
+			}());
+			
 		%}
 	| property '{'
 		%{
-			yy.scope.begin();
-			let fnName = $property
-			if (/\-/.test($property)) {
-				fnName = "";
-			}
-			$$ = {
-				name: $property,
-				expr: `scope.createScope(function ${fnName}(){`
-			};
+			$$ = (function () {
+				let async = yy.scope.asyncFlag;
+				yy.scope.begin();
+				let fnName = $property
+				if (/\-/.test($property)) {
+					fnName = "";
+				}
+				return {
+					name: $property,
+					expr: `scope.createScope(${async}function ${fnName}(){`
+				};
+			}());
+			
 		%}
 	;
 
@@ -584,8 +639,9 @@ scopeStart
 			yy.scope.endParen(true);
 			$$ = (function () {
 				let args = yy.scope.argsDecl;
+				let async = yy.scope.asyncFlag;
 				yy.scope.begin();
-				return `scope.createScope(function(...args){${args}`;
+				return `scope.createScope(${async}function(...args){${args}`;
 			}());
 		%}
 	| FUNCTION '(' scopeArguments ',' scopeArgumentSpread '){'
@@ -593,11 +649,12 @@ scopeStart
 			yy.scope.endParen(true);
 			$$ = (function () {
 				let args = yy.scope.argsDecl;
+				let async = yy.scope.asyncFlag;
 				let argsLength = yy.scope.argsLength;
 				let spreadProp = $scopeArgumentSpread;
 				let spread = `scope.declare("let", ["${spreadProp}",args.slice(${argsLength})]);`;
 				yy.scope.begin();
-				return `scope.createScope(function(...args){${args}${spread}`;
+				return `scope.createScope(${async}function(...args){${args}${spread}`;
 			}());
 		%}
 	| FUNCTION '(' scopeArgumentSpread '){'
@@ -606,24 +663,34 @@ scopeStart
 			$$ = (function () {
 				let spreadProp = $scopeArgumentSpread;
 				let spread = `scope.declare("let", ["${spreadProp}",args]);`;
+				let async = yy.scope.asyncFlag;
 				yy.scope.begin();
-				return `scope.createScope(function(...args){${spread}`;
+				return `scope.createScope(${async}function(...args){${spread}`;
 			}());
 		%}
 	| FUNCTION '(){'
 		%{
-			yy.scope.begin();
-			$$ = 'scope.createScope(function(){';
+			$$ = (function () {
+				let async = yy.scope.asyncFlag;
+				yy.scope.begin();
+				return `scope.createScope(${async}function(){`;
+			}());
 		%}
 	| FUNCTION '{'
 		%{
-			yy.scope.begin();
-			$$ = 'scope.createScope(function(){';
+			$$ = (function () {
+				let async = yy.scope.asyncFlag;
+				yy.scope.begin();
+				return `scope.createScope(${async}function(){`;
+			}());
 		%}
 	| '{'
 		%{
-			yy.scope.begin();
-			$$ = 'scope.createScope(function(){';
+			$$ = (function () {
+				let async = yy.scope.asyncFlag;
+				yy.scope.begin();
+				return `scope.createScope(${async}function(){`;
+			}());
 		%}
 	;
 
@@ -752,7 +819,18 @@ unaryExpr
 	| DECREMENT expr
 		{$$ = '--' + $expr;}
 	| AWAIT expr
-		{$$ = `await ${$expr}`;}
+		{$$ = `(await (async ()=>{let r = await ${$expr};scope._scoping = this._scoping;return r;})())`;}
+	| INCLUDE string
+		{
+			yy.lexer._more = true;
+			$$ = (function () {
+				let f = path.join(script_dir,$string.substr(1,$string.length-2));
+				//console.log(yy.lexer);
+				let r = yy.parser.include(f);
+				//console.log(r);
+				return r;
+			}());
+		}
 	| NOT expr
 		{$$ = '!' + $expr;}
 	;

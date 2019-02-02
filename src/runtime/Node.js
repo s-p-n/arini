@@ -8,6 +8,14 @@ class Node {
 			let child = children[i];
 			if (child instanceof Node) {
 				child.parent = this;
+				if (this[child.name] !== undefined) {
+					if (!(this[child.name] instanceof Array)) {
+						this[child.name] = [this[child.name]];
+					}
+					this[child.name].push(child);
+				} else {
+					this[child.name] = child;
+				}
 				continue;
 			}
 			if (child instanceof TextNode) {
@@ -29,10 +37,32 @@ class Node {
 		} else {
 			return result + "/>";
 		}
-		for (child of this.children) {
+		for (let child of this.children) {
 			result += child.toString();
 		}
 		return result + `</${this.name}>`;
+	}
+
+	push(child) {
+		if (child instanceof Node) {
+			this.children.push(child);
+			child.parent = this;
+			if (this[child.name] !== undefined) {
+				if (!(this[child.name] instanceof Array)) {
+					this[child.name] = [this[child.name]];
+				}
+				this[child.name].push(child);
+			} else {
+				this[child.name] = child;
+			}
+			return true;
+		}
+		if (child instanceof TextNode) {
+			this.children.push(child);
+			child.parent = this;
+			return true;
+		}
+		return this.push(new TextNode(child));
 	}
 }
 

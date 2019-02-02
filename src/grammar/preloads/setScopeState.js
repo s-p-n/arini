@@ -5,12 +5,18 @@ module.exports = function setScopeState(parser) {
 			this.expressions = [];
 			this.parent = parent;
 			priv.set(this, Object.create(null));
+			priv.get(this).isAsync = false;
 		}
 
 		get argsDecl () {
 			let self = parser.yy.scope;
 			let args = priv.get(self).args || [];
 			return `scope.declare("let", ${args.join(',')});`;
+		}
+
+		get asyncFlag () {
+			let self = parser.yy.scope;
+			return priv.get(self).isAsync ? "async " : "";
 		}
 
 		get argsLength () {
@@ -31,7 +37,10 @@ module.exports = function setScopeState(parser) {
 
 		begin () {
 			let self = parser.yy.scope;
+			let isAsync = priv.get(self).isAsync;
+			priv.get(self).isAsync = false;
 			parser.yy.scope = new Scope(self);
+			priv.get(parser.yy.scope).isAsync = isAsync;
 		}
 
 		beginParen () {
@@ -66,6 +75,11 @@ module.exports = function setScopeState(parser) {
 			i = args.length;
 			args.push(`[${name},((args[${i}]!==undefined)?(args[${i}]):(${defaultValue}))]`);
 			return self.args;
+		}
+
+		setAsync () {
+			let self = parser.yy.scope;
+			priv.get(self).isAsync = true;
 		}
 
 		pushStmt (stmt) {

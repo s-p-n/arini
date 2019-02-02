@@ -2,10 +2,11 @@
 
 const inputFile = process.argv[2];
 const option = process.argv[3];
-const debug = (...args) => {
-	//return console.log(...args);
+const debug = (msg) => {
+	return console.log(`${debug.id}\t[${Date.now()-start}ms]:\t${msg}`);
 };
-debug("runFile.js:", process.argv, inputFile, option);
+debug.id = "";
+const start = Date.now();
 //process.exit();
 if (typeof inputFile === "undefined") {
 	require('./interactive.js');
@@ -16,6 +17,8 @@ if (typeof inputFile === "undefined") {
 	const file = path.isAbsolute(inputFile) ? inputFile : path.join(cwd, inputFile);
 	const runtime = require('../runtime/runtime.js');
 	const Grammar = require('../grammar/grammar.js');
+
+	debug.id = path.dirname(file) + '->' + path.basename(file);
 
 	async function setupParser() {
 		debug("setting up parser.");
@@ -44,14 +47,21 @@ if (typeof inputFile === "undefined") {
 		debug("Executing file.");
 		parser.parse(code);
 		
-		if (option === "--fork") {
+		switch(option) {
+		case "--fork":
 			debug("forking...");
 			process.send({code: parser.yy.scope.toJS()});
-		} else {
+			break;
+		case "--toJS":
+			console.log(parser.yy.scope.toJS());
+			break;
+		default:
 			parser.eval();
 		}
+		debug(`finished.`);
 	}).catch(err => {
 		console.error("got error");
+		console.error(err);
 		process.exit(1);
 	});
 }

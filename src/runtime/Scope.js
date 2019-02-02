@@ -9,7 +9,7 @@ Object.defineProperty(Object.prototype, "compare", {
 	configurable: true,
 	writable: true,
 	value: function compare (b) {
-		return Object.keys(this).every(key => this[key] === b[key]);
+		return (b !== undefined) && Object.keys(this).every(key => ((key in b) && (this[key] === b[key])));
 	}
 });
 
@@ -24,6 +24,8 @@ class Scope extends Api {
 	constructor () {
 		super();
 		const self = this;
+		const arini_dir = path.dirname(path.dirname(process.argv[1]));
+		const script_dir = (process.argv[2] !== undefined) ? path.dirname(path.join(process.cwd(), process.argv[2])) : process.cwd();
 		self._scoping = self.map([
 			["let", self.array()],
 			["private", self.array()],
@@ -46,7 +48,10 @@ class Scope extends Api {
 					return require;
 				}
 				if (prop === "__dirname") {
-					return path.dirname(path.join(process.cwd(), process.argv[2]));
+					return script_dir;
+				}
+				if (prop === "__arini_dir") {
+					return arini_dir;
 				}
 				if (prop === "async") {
 					return self.async;
@@ -413,6 +418,11 @@ class Scope extends Api {
 			'parent'
 		];
 
+		//console.log("SET::");
+		//console.log(obj);
+		//console.log(prop);
+		//console.log(val);
+
 		if (obj === global) {
 			if (prop in global) {
 				return obj[prop] = val;
@@ -431,7 +441,10 @@ class Scope extends Api {
 				return self.set(obj.parent, prop, val);
 			}
 			if (prop in obj[slot]) {
-				return obj[slot][prop] = val;
+				//console.log("prop exists:", prop, "as", obj[slot][prop]);
+				obj[slot][prop] = val;
+				//console.log("is now:", obj[slot][prop]);
+				return obj[slot][prop];
 			}
 		}
 		return obj[prop] = val;

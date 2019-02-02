@@ -1,4 +1,4 @@
-%options case-insensitive
+%options case-insensitive flex easy_keyword_rules
 
 %{
 	yy.setStr = function setStr(body, txt) {
@@ -79,15 +79,15 @@
 													return "<";
 												} else if ((/^\=/).test(this._input)) {
 													yytext += "=";
-													this.match += '=';
+													//this.match += '=';
 													this.matched += '=';
-													this._input = this._input.substr(1);
+													this._input = this._input.substr(1) || "";
 													return "SIZECMP"
 												} else if ((/^\-/).test(this._input)) {
 													yytext += "-";
 													this.match += '-';
 													this.matched += '-';
-													this._input = this._input.substr(1);
+													this._input = this._input.substr(1) || "";
 													return "BY";
 												}
 												return "SIZECMP";
@@ -169,11 +169,11 @@ r(?:\'\'\'|\"\"\"|[/"'@~%`])      		 	%{
 	                                                    yytext += match;
 	                                                    this.match += match;
 	                                                    this.matched += match;
-	                                                    this._input = this._input.substr(match.length + 1);
+	                                                    this._input = this._input.substr(match.length + 1) || "";
 	                                                } else if (block_comment_regex.test(this._input)) {
 	                                                	let match = this._input.match(block_comment_regex)[0];
 	                                                	yytext += match;
-	                                                    this._input = this._input.substr(match.length);
+	                                                    this._input = this._input.substr(match.length) || "";
 	                                                } else {
                                                 		return "DIVIDE";
                                                 	}
