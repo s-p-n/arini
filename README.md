@@ -50,7 +50,7 @@ print(foo["question"]); // "What is the..."
 print(foo.answer); // 42 
 
 let bar = ["cow", "pig", "sheep"];
-each(bar, (val = "") {
+bar.forEach(#(val) {
 	print(val);
 });
 /*
@@ -70,11 +70,11 @@ let myComponent = <someTag with="attributes">
     <nestedTag>
         "This is a nested string in a nested tag.";
         someVariable;
-        if(someSwitch, {
+        if (someSwitch) {
             return <switch on=true />;
-        }, {
+        } else {
             return <switch on=false />;
-        });
+        };
     </nestedTag>;
 </someTag>;
 print(myComponent.nestedTag.switch.on); 
@@ -113,6 +113,4 @@ For more information on extensions, visit the wiki.
 
 ### Base Library
 Scope comes with a base library necessary for basic programming. There are some constants under development right now, but the naming is not quite right yet, so please don't use them yet. I won't mention them for that purpose, but if you see `__blah` don't rely on it yet.
-
-
 
