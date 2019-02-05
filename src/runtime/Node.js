@@ -17,9 +17,12 @@ class Node {
 					this[child.name] = child;
 				}
 				continue;
-			}
-			if (child instanceof TextNode) {
+			}else if (child instanceof TextNode) {
 				child.parent = this;
+				continue;
+			}else if (child instanceof Array) {
+				/// implode inner arrays in-place
+				children.splice(i,1,...child);
 				continue;
 			}
 			this.children[i] = new TextNode(child);

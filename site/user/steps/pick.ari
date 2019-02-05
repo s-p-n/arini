@@ -1,0 +1,38 @@
+public stylesheet = [
+	".pick" = [
+		padding = 10,
+		margin = 10,
+		flex = 200,
+		background = "rgb(20, 180, 75)"
+	],
+	".picks" = [
+		display = "flex"
+
+	]
+];
+
+public Style (props) {
+	let s = props.children;
+	let result = "";
+
+	// First, cycle through children:
+	s.forEach(#(s, i) {
+		console.log(s, i);
+	});
+	return <style>result;</style>;
+};
+
+public Pick (props) {
+	return 
+	<div class="pick">
+		<h3>props.title;</h3>;
+		<p>props.teaser;</p>;
+	</div>;
+};
+
+public Picks (props) {
+	return
+	<div class="picks">
+		props.children;
+	</div>;
+};

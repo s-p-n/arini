@@ -36,6 +36,33 @@ protected Client (req) {
 	return req.session;
 };
 
+let site = {
+	let nodes = {return ["public" = include "./steps/pick.ari"];};
+	use nodes;
+
+	return <html>
+		<head>
+			<Style>
+				stylesheet;
+			</Style>;
+		</head>;
+		<body>
+			<header>
+				<h1>
+					"Arini.io";
+				</h1>;
+			</header>;
+			<section>
+				<Picks>
+					<Pick title="New?" teaser="Check out our tour!" />;
+					<Pick title="Already been here?" teaser="Skip the tour" />;
+				</Picks>;
+			</section>;
+		</body>;
+	</html>;
+}();
+
+
 public install (server) {
 	let [app, http, io] = server;
 
@@ -51,7 +78,7 @@ public install (server) {
 		console.log("get '/'");
 		console.log(client is clients[client.index]);
 		console.log(clients.length, client.index);
-		res.end(`My client index is ${client.index}.\nMy Client ID is ${client.id}`);
+		res.end(site.toString());
 	});
 
 

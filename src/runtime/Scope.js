@@ -580,17 +580,11 @@ class Scope extends Api {
 				break;
 		}
 		if (/^[A-Z]/.test(name[0])) {
-			console.log(`${name} could be an ID.`);
-			console.log(`Looking up ${name}...`);
 			let id = self.id[name];
 			if (self.getType(id) === "function") {
-				console.log(`${name} is a function. Using that instead of a Node.`);
-				//name = id;
 				let props = {...attributes};
 				props.children = children;
 				return id(props);
-			} else {
-				console.log(`${name} is not a function, using the Node <${name}...>.`);
 			}
 		}
 		return new Node(name, attributes, children);
