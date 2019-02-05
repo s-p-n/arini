@@ -12,8 +12,16 @@ Object.defineProperty(Object.prototype, "compare", {
 		return (b !== undefined) && Object.keys(this).every(key => ((key in b) && (this[key] === b[key])));
 	}
 });
-
+Object.defineProperty(Array.prototype, "each", {
+	enumerable: false,
+	configurable: true,
+	writable: true,
+	value: function each (f) {
+		return Object.keys(this).every(key => f(key, this[key], this));
+	}
+});
 const path = require('path');
+const RandExp = require('randexp');
 
 const Api = <include file="./Api.js"/>;
 const Node = <include file="./Node.js"/>;
@@ -278,6 +286,9 @@ class Scope extends Api {
 		if (expr instanceof Map) {
 			return "map";
 		}
+		if (expr instanceof RegExp) {
+			return "regex";
+		}
 		return typeof expr;
 	}
 
@@ -339,6 +350,10 @@ class Scope extends Api {
 		return self.array(arr);
 	}
 
+	randexp (...args) {
+		return new RandExp(...args);
+	}
+
 	random (n=1) {
 		const self = this;
 		n = parseInt(n);
@@ -347,7 +362,18 @@ class Scope extends Api {
 			let result;
 			let isStr = false;
 			let keys = Object.keys(list);
-			if (typeof list === "string") {
+			if (self.getType(list) === "regex") {
+				let r = self.randexp(list);
+				if (n === 1) {
+					return r.gen();
+				}
+				result = [];
+				for (let i = 0; i < n; i += 1) {
+					result.push(r.gen());
+				}
+				return self.array(result);
+			}
+			if (self.getType(list) === "string") {
 				isStr = true;
 			}
 			if (n === 1) {
@@ -363,7 +389,7 @@ class Scope extends Api {
 				return self.array(result);
 			}
 			return result.join('');
-		});
+		}, ["array", "object", "map", "string", "regex"]);
 	}
 
 	range (start=0, end=0, inc=1) {

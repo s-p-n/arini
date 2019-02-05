@@ -202,6 +202,8 @@ r(?:\'\'\'|\"\"\"|[/"'@~%`])      		 	%{
 ">="                                         {return "SIZECMP";}
 "=="                                         {return "EQ";}
 "!="                                         {return "INEQ";}
+"+="										 {return "PLUS_BECOMES";}
+"-="										 {return "MINUS_BECOMES";}
 "&&"                                         {return "AND";}
 "||"                                         {return "OR";}
 "++"                                         {return "INCREMENT";}

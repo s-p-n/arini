@@ -4,7 +4,7 @@
 	const arini_dir = path.dirname(path.dirname(process.argv[1]));
 %}
 
-%left BECOMES XML_ATTR_BECOMES
+%left BECOMES XML_ATTR_BECOMES PLUS_BECOMES MINUS_BECOMES
 %left AND OR
 %left EQ INEQ SIZECMP
 %left IN HAS FROM
@@ -147,10 +147,20 @@ binaryExpr
 		{$$ = `scope.in(${$a}, ${$b})`;}
 	| expr[a] HAS expr[b]
 		{$$ = `scope.has(${$a}, ${$b})`;}
+
 	| property BECOMES expr
 		{$$ = `scope.set(this._scoping,"${$property}",${$expr})`;}
 	| id BECOMES expr
 		{$$ = `scope.set(${$id.parent},${$id.prop},${$expr})`;}
+	| property PLUS_BECOMES expr
+		{$$ = `scope.set(this._scoping,"${$property}",(scope.id["${$property}"]+${$expr}))`;}
+	| id PLUS_BECOMES expr
+		{$$ = `scope.set(${$id.parent},${$id.prop},${$id.parent}[${$id.prop}]+${$expr})`;}
+	| property MINUS_BECOMES expr
+		{$$ = `scope.set(this._scoping,"${$property}",(scope.id["${$property}"]-${$expr}))`;}
+	| id MINUS_BECOMES expr
+		{$$ = `scope.set(${$id.parent},${$id.prop},${$id.parent}[${$id.prop}]-${$expr})`;}
+
 	| expr[a] '[' ']' BECOMES expr[b]
 		{$$ = `${$a}.push(${$b})`;}
 	| expr[a] TO expr[b] BY expr[c]

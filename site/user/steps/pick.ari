@@ -3,22 +3,46 @@ public stylesheet = [
 		padding = 10,
 		margin = 10,
 		flex = 200,
-		background = "rgb(20, 180, 75)"
+		background = "rgb(29, 163, 105)",
+		box-shadow = "5px 5px 10px rgba(0, 0, 0, 0.3)",
+		transition = ".5s",
+		":hover" = [
+			cursor = "pointer",
+			box-shadow-color = "rgba(0,0,0,1)",
+			background-color = "rgb(39, 200, 125)"
+		]
 	],
 	".picks" = [
-		display = "flex"
+		display = "flex",
+		flex-direction = "both"
 
 	]
 ];
 
-public Style (props) {
-	let s = props.children;
+private arrayToCss(rules) {
 	let result = "";
-
-	// First, cycle through children:
-	s.forEach(#(s, i) {
-		console.log(s, i);
+	rules.each(#(selector, body) {
+		result += `${selector}{`;
+		body.each(#(name, value) {
+			if (scope.getType(value) is "array") {
+				result += `}${arrayToCss([(selector + name) = value])}`;
+				result += `${selector}{`;
+			} else {
+				if (scope.getType(value) is "number") {
+					value = `${value}px`;
+				};
+				result += `${name}:${value};`;
+			};
+		});
+		result += "}";
 	});
+	return result;
+};
+
+public Style (props) {
+	let children = props.children;
+	let result = children.map(arrayToCss);
+	console.log(result);
 	return <style>result;</style>;
 };
 
