@@ -1,0 +1,13 @@
+/**
+	Expect the server to have
+	[
+		app: 	express.js app
+		http: 	http server using app.
+		io: 	socket.io server using http.
+	]
+**/
+let server = include "./server/server.ari";
+let experience = include "./user/experience.ari";
+
+experience.install(server);
+server.start();

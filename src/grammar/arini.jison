@@ -2,7 +2,6 @@
 	const fs = require('fs');
 	const path = require('path');
 	const arini_dir = path.dirname(path.dirname(process.argv[1]));
-	const script_dir = (process.argv[2] !== undefined) ? path.dirname(path.join(process.cwd(), process.argv[2])) : process.cwd();
 %}
 
 %left BECOMES XML_ATTR_BECOMES
@@ -824,7 +823,9 @@ unaryExpr
 		{
 			yy.lexer._more = true;
 			$$ = (function () {
-				let f = path.join(script_dir,$string.substr(1,$string.length-2));
+				console.log("script dir:", yy.script_dir);
+				let f = path.join(yy.script_dir,$string.substr(1,$string.length-2));
+				console.log("include:",f);
 				//console.log(yy.lexer);
 				let r = yy.parser.include(f);
 				//console.log(r);

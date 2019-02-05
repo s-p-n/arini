@@ -1,0 +1,3 @@
+public app = require("express")();
+public http = require("http").Server(app);
+public io = require("socket.io")(http);

@@ -1,0 +1,59 @@
+let session = require("express-session");
+
+// Master list of clients
+protected clients = [];
+
+public config = [
+	session = [
+		cookie = [
+			maxAge = 15768000, // 6 months
+			httpOnly = true,
+			sameSite = "strict",
+			secure = false,
+			path = "/"
+		]
+	]
+];
+
+
+protected randomToken (
+		size = 16,
+		field = ("A" to "Z") + ("a" to "z") + ("0" to "9") + "-_"
+		//field = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+	) {
+	return random size from field;
+};
+
+protected Client (req) {
+	if (req.session.index is undefined) {
+		let index = (clients.push(req.session) - 1);
+		if (req.session is clients[index]) {
+			req.session.index = index;
+		};
+	} else {
+		clients[req.session.index] = req.session;
+	};
+	return req.session;
+};
+
+public install (server) {
+	let [app, http, io] = server;
+
+	app['use'](session([
+		secret = randomToken(), 
+		cookie = config.session.cookie,
+		resave = false,
+		saveUninitialized = false
+	]));
+
+	app.get('/', #(req, res) {
+		let client = Client(req);
+		console.log("get '/'");
+		console.log(client is clients[client.index]);
+		console.log(clients.length, client.index);
+		res.end(`My client index is ${client.index}.\nMy Client ID is ${client.id}`);
+	});
+
+
+	console.log("Experience installed.");
+};

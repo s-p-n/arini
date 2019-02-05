@@ -82,6 +82,8 @@ module.exports = function setState (parser, runtime={}) {
 	// Run all preloads (from the preloads directory).
 	for (let [,prep] of preloads) prep(parser);
 
+	parser.yy.script_dir = (process.argv[2] !== undefined) ? path.dirname(path.join(process.cwd(), process.argv[2])) : process.cwd();
+
 	parser.eval = function (name="shell", 
 			prefix="module.exports = (async function(){this._scoping=scope._scoping;", 
 			suffix="}());"
@@ -98,6 +100,8 @@ module.exports = function setState (parser, runtime={}) {
 		let r = require('../runtime/runtime.js');
 		let p = new g(r);
 		let code = fs.readFileSync(f, "utf8");
+		p.yy.script_dir = path.dirname(f);
+		console.log("child script_dir:", p.yy.script_dir);
 		p.parse(`{${code}}();`);
 		return p.yy.scope.toJS();
 	}
