@@ -1,12 +1,17 @@
 module.exports = function setXmlState (parser) {
 	class Tag {
-		constructor (tagName, attributes) {
+		constructor (tagName, attributes, isShort=false) {
 			this.tagName = tagName;
 			this.attributes = attributes;
+			this.isShort = isShort;
 		}
 		toJS () {
 			let children = parser.yy.scope.expressions;
 			let result = `scope.xml("${this.tagName}",{${this.attributes}}`;
+			console.log("isShort:", this.isShort);
+			if (this.isShort) {
+				return result + ')';
+			}
 			if (children.length === 0) {
 				return result + ")";
 			}

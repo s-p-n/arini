@@ -810,14 +810,14 @@ tagBlockStart
 				let parent = yy.scope;
 				yy.scope.begin();
 				//console.log($XML_OPEN_ID, yy.scope.expressions);
-				return new yy.xml.Tag($XML_OPEN_ID, $attributeList, yy.scope.expressions, parent);
+				return new yy.xml.Tag($XML_OPEN_ID, $attributeList);
 			}());
 		}
 	;
 
 tagShort
 	: "<" XML_OPEN_ID attributeList XML_SHORT_CLOSE
-		{$$ = (new yy.xml.Tag($XML_OPEN_ID, $attributeList, [], yy.scope.expressions)).toJS();}
+		{$$ = (new yy.xml.Tag($XML_OPEN_ID, $attributeList, true)).toJS();}
 	;
 
 unaryExpr

@@ -734,12 +734,12 @@ case 146:
 				let parent = yy.scope;
 				yy.scope.begin();
 				//console.log($$[$0-2], yy.scope.expressions);
-				return new yy.xml.Tag($$[$0-2], $$[$0-1], yy.scope.expressions, parent);
+				return new yy.xml.Tag($$[$0-2], $$[$0-1]);
 			}());
 		
 break;
 case 147:
-this.$ = (new yy.xml.Tag($$[$0-2], $$[$0-1], [], yy.scope.expressions)).toJS();
+this.$ = (new yy.xml.Tag($$[$0-2], $$[$0-1], true)).toJS();
 break;
 case 148:
 this.$ = '-' + $$[$0]

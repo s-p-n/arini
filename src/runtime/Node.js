@@ -33,7 +33,7 @@ class Node {
 	toString() {
 		let result = `<${this.name}`;
 		for (let attr in this.attributes) {
-			result += ` ${attr}=${this.attributes[attr]}`;
+			result += ` ${attr}="${this.attributes[attr]}"`;
 		}
 		if (this.children.length > 0) {
 			result += ">";

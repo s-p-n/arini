@@ -1,4 +1,6 @@
 let session = require("express-session");
+let fs = require("fs");
+let path = require("path");
 
 // Master list of clients
 protected clients = [];
@@ -39,15 +41,20 @@ protected Client (req) {
 let site = {
 	let nodes = {return ["public" = include "./steps/pick.ari"];};
 	use nodes;
-	return <html>
+	return <html lang="en">
 		<head>
+			<title>
+				"Experience Arini";
+			</title>;
+			<meta name="theme-color" content="rgb(53, 82, 70)"/>;
+			<meta name="viewport" content="width=device-width, initial-scale=1" />;
 			<Style>
 				stylesheet;
 				[
 					body = [
 						padding = 0,
 						margin = 0,
-						background-image = "url(https://upload.wikimedia.org/wikipedia/commons/e/ec/Ara_ararauna_Luc_Viatour.jpg)"
+						background-image = "url(/public/Ara_ararauna_Luc_Viatour.webp)"
 					],
 					main = [
 						background = "rgba(255, 255, 255, 0.95)",
@@ -58,7 +65,9 @@ let site = {
 						width = "70%",
 						height = "100%",
 						display = "flex",
-						flex-direction = "column"
+						flex-direction = "column",
+						padding = 10,
+						font-family = "sans-serif"
 					],
 					"section,header" = [
 						flex = "auto"
@@ -87,14 +96,38 @@ let site = {
 				</h1>;
 			</header>;
 			<main>
+				
+				<section>
+					<h1>
+						"Help me finish Arini";
+					</h1>;
+					<p>
+						<a href="https://www.patreon.com/arini">"Become my Patreon today";</a>; 
+						" to speed up the development of Arini.";
+					</p>;
+					<h2>
+						"Arini.io isn't quite finished yet";
+					</h2>;
+					<p>
+						"Here are some things to do in the mean-time:";
+					</p>;
+					<ul>
+						<li>
+							<a href="https://www.github.com/s-p-n/arini">"See Arini on Github";</a>; 
+						</li>;
+						<li>
+							<a href="https://www.npmjs.com/package/arini">"See Arini on npm";</a>; 
+						</li>;
+					</ul>;
+				</section>;
+				/*
 				<section>
 					<Picks>
 						<Pick title="New?" teaser="Check out our tour!" />;
 						<Pick title="Already been here?" teaser="Skip the tour" />;
 					</Picks>;
 				</section>;
-				<section>
-				</section>;
+				*/
 			</main>;
 		</body>;
 	</html>;
@@ -103,14 +136,18 @@ let site = {
 
 public install (server) {
 	let [app, http, io] = server;
-
+	let resourceFilter = r`[a-z0-9\-_]+\.[a-z0-9]{1,5}`i;
+	app.set("X-Powered-By", "Arini");
 	app['use'](session([
 		secret = randomToken(), 
 		cookie = config.session.cookie,
 		resave = false,
 		saveUninitialized = false
 	]));
-
+	app['use'](#(req, res, next) {
+		res.set("X-Powered-By", "Arini");
+		next();
+	});
 	app.get('/', #(req, res) {
 		let client = Client(req);
 		console.log("get '/'");
@@ -118,7 +155,21 @@ public install (server) {
 		console.log(clients.length, client.index);
 		res.end(site.toString());
 	});
-
+	app.get('/public/:resource', #(req, res) {
+		let resource = req.params.resource;
+		console.log(resource);
+		console.log(__dirname);
+		if (resourceFilter.test(resource)) {
+			let target = path.join(__dirname, '/user/public/', resource);
+			console.log("target:", target);
+			console.log(process.cwd());
+			if (fs.existsSync(target)) {
+				console.log("resource exists.");
+				return res.sendFile(target);
+			};
+		};
+		res.status(404).end("404: Not Found.");
+	});
 
 	console.log("Experience installed.");
 };
