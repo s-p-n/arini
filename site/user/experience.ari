@@ -1,6 +1,7 @@
 let session = require("express-session");
 let fs = require("fs");
 let path = require("path");
+let [aceStyle, Ace] = include "./widgets/editor/ace.ari";
 
 // Master list of clients
 protected clients = [];
@@ -39,7 +40,10 @@ protected Client (req) {
 };
 
 let site = {
-	let nodes = {return ["public" = include "./steps/pick.ari"];};
+	let nodes = {
+		return [
+			"public" = include "./widgets/steps/pick.ari"];
+	};
 	use nodes;
 	return <html lang="en">
 		<head>
@@ -50,6 +54,7 @@ let site = {
 			<meta name="viewport" content="width=device-width, initial-scale=1" />;
 			<Style>
 				stylesheet;
+				aceStyle;
 				[
 					body = [
 						padding = 0,
@@ -113,6 +118,9 @@ let site = {
 					</p>;
 					<ul>
 						<li>
+							<a href="https://brave.com/ari417">"Try the Brave Browser";</a>;
+						</li>;
+						<li>
 							<a href="https://www.github.com/s-p-n/arini">"See Arini on Github";</a>; 
 						</li>;
 						<li>
@@ -120,14 +128,17 @@ let site = {
 						</li>;
 					</ul>;
 				</section>;
-				/*
 				<section>
 					<Picks>
 						<Pick title="New?" teaser="Check out our tour!" />;
 						<Pick title="Already been here?" teaser="Skip the tour" />;
 					</Picks>;
 				</section>;
-				*/
+				<section>
+					<Ace>
+						"console.log('Hello, World!');";
+					</Ace>;
+				</section>;
 			</main>;
 		</body>;
 	</html>;
@@ -161,6 +172,22 @@ public install (server) {
 		console.log(__dirname);
 		if (resourceFilter.test(resource)) {
 			let target = path.join(__dirname, '/user/public/', resource);
+			console.log("target:", target);
+			console.log(process.cwd());
+			if (fs.existsSync(target)) {
+				console.log("resource exists.");
+				return res.sendFile(target);
+			};
+		};
+		res.status(404).end("404: Not Found.");
+	});
+
+	app.get('/public/src-min-noconflict/:resource', #(req, res) {
+		let resource = req.params.resource;
+		console.log(resource);
+		console.log(__dirname);
+		if (resourceFilter.test(resource)) {
+			let target = path.join(__dirname, '/user/public/src-min-noconflict/', resource);
 			console.log("target:", target);
 			console.log(process.cwd());
 			if (fs.existsSync(target)) {

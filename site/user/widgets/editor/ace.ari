@@ -1,0 +1,22 @@
+let css = [
+"#editor" = [
+	margin = 0,
+	position = "relative",
+	width = 500,
+	height = 500
+]];
+let scripts = [
+	<script src="/public/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>,
+	<script>`
+		var editor = ace.edit("editor");
+		editor.setTheme("ace/theme/twilight");
+		editor.session.setMode("ace/mode/javascript");
+	`;</script>
+];
+
+return [css, #(props) {
+	return <div>
+		<pre id="editor">props.children;</pre>;
+		scripts;
+	</div>;
+}];

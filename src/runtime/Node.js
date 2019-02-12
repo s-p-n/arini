@@ -35,7 +35,7 @@ class Node {
 		for (let attr in this.attributes) {
 			result += ` ${attr}="${this.attributes[attr]}"`;
 		}
-		if (this.children.length > 0) {
+		if (this.children.length > 0 || this.name.toLowerCase() === "script") {
 			result += ">";
 		} else {
 			return result + "/>";
