@@ -2,11 +2,23 @@
 A programming language for Creators. Arini becomes Node.js.
 
 ## Philosophy
-A scope is any code inside `{` and `}`, and the idea of arini is, that's all you need. A scope can be a simple block of code, a function/method, a class, an interface, or any encapsolation you need. If you write code like I do, you might start out by writing a simple bit of code, then refactor some of that code into a function, then maybe later even create a class or two with several methods. The arini programming language makes migrating and merging paradigms easy by utilizing a single scope type.
+A scope is any Arini file, or syntactically created using `#(args){...}`. A Scope is divided into 3 parts:
+* Optional name and/or arguments.
+* Declarative code - declare public, protected, or private properties.
+* construction code - invoke expressions, conditional statements, return statements, etc.
 
-As a bonus, using a single first-class scope type makes arini easy to learn and remember.
+Construction code can be in the declarative section as values.
+Properties may not be declared outside of the declarative code.
 
-Before reading forward, all of the following content has been translated into an easy-to-take course that you can try on your web browser. https://www.katacoda.com/spn/scenarios/hello-world
+Scopes are used for various forms of encapsulation. Scopes may be invoked, allowing the programmer to return a result of her choice, or to reveal the public properties. Scopes may be used by one-another, allowing the programmer to share protected properties. 
+
+You might notice I didn't mention methods. That's because Scopes are first-class values. Properties that have a Scope as their value, _are_ methods. Conveniently, a creative amount of nesting is possible with Scopes, and each one may be as simple or complex as needed.
+
+Using a single first-class encapsulation type makes Arini easy to learn and remember.
+
+## Learn Arini
+Before reading forward, all of the following content has been translated into an **easy-to-take course that you can try in your web-browser** for the cost of a free sign-up. 
+https://www.katacoda.com/spn/scenarios/hello-world
 
 ## Getting Started
 How to create an Arini Project with npm.
