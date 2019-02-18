@@ -6,8 +6,9 @@
 // When all is said and done, `preloads`
 // looks like:
 //     Map { ...'preloadFile' => [Function: preloadFile] }
-let fs = require("fs");
-let path = require("path");
+const fs = require("fs");
+const path = require("path");
+const Module = require('module');
 const preloads = (function () {
 	let preloadsDir = path.join(__dirname, "preloads");
 	let preloadFileArray = fs.readdirSync(preloadsDir);
@@ -67,8 +68,7 @@ function parseMacros(code) {
 }
 
 function requireFromString(src, filename) {
-	let parent = module.parent;
-	const Module = module.constructor;
+	const parent = module.parent;
 	const m = new Module(filename, parent);
 	m.filename = filename;
 	m.paths = Module._nodeModulePaths(path.dirname(filename));

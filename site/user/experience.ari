@@ -101,33 +101,6 @@ let site = {
 				</h1>;
 			</header>;
 			<main>
-				
-				<section>
-					<h1>
-						"Help me finish Arini";
-					</h1>;
-					<p>
-						<a href="https://www.patreon.com/arini">"Become my Patreon today";</a>; 
-						" to speed up the development of Arini.";
-					</p>;
-					<h2>
-						"Arini.io isn't quite finished yet";
-					</h2>;
-					<p>
-						"Here are some things to do in the mean-time:";
-					</p>;
-					<ul>
-						<li>
-							<a href="https://brave.com/ari417">"Try the Brave Browser";</a>;
-						</li>;
-						<li>
-							<a href="https://www.github.com/s-p-n/arini">"See Arini on Github";</a>; 
-						</li>;
-						<li>
-							<a href="https://www.npmjs.com/package/arini">"See Arini on npm";</a>; 
-						</li>;
-					</ul>;
-				</section>;
 				<section>
 					<Picks>
 						<Pick title="New?" teaser="Check out our tour!" />;
