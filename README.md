@@ -16,7 +16,7 @@ You might notice I didn't mention methods. That's because Scopes are first-class
 
 Using a single first-class encapsulation type makes Arini easy to learn and remember.
 
-## Learn Arini
+## Try Arini Online
 Before reading forward, all of the following content has been translated into an **easy-to-take course that you can try in your web-browser** for the cost of a free sign-up. 
 https://www.katacoda.com/spn/scenarios/hello-world
 
