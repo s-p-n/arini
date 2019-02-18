@@ -1,5 +1,5 @@
 # Arini
-A programming language for web developers. Arini becomes Node.js.
+A programming language for Creators. Arini becomes Node.js.
 
 ## Philosophy
 A scope is any code inside `{` and `}`, and the idea of arini is, that's all you need. A scope can be a simple block of code, a function/method, a class, an interface, or any encapsolation you need. If you write code like I do, you might start out by writing a simple bit of code, then refactor some of that code into a function, then maybe later even create a class or two with several methods. The arini programming language makes migrating and merging paradigms easy by utilizing a single scope type.
