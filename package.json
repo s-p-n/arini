@@ -1,7 +1,7 @@
 {
   "name": "arini",
-  "version": "1.1.2-beta-repl",
-  "description": "A Better Way",
+  "version": "1.1.2-beta",
+  "description": "A Language that creates Web Apps",
   "main": "index.js",
   "scripts": {
     "generate": "jison src/grammar/arini.jison src/grammar/arini.jisonlex -o src/grammar/parser.js",
@@ -39,7 +39,6 @@
     "express-session": "^1.15.6",
     "js-beautify": "^1.7.5",
     "meow": "^5.0.0",
-    "module": "^1.2.5",
     "mongojs": "^2.6.0",
     "randexp": "^0.5.3",
     "shelljs": "^0.8.2",

@@ -8,7 +8,10 @@
 //     Map { ...'preloadFile' => [Function: preloadFile] }
 const fs = require("fs");
 const path = require("path");
-const Module = require('module');
+let Module = module.constructor;
+if (typeof Module._nodeModulePaths !== "function") {
+	Module = require('module');
+}
 const preloads = (function () {
 	let preloadsDir = path.join(__dirname, "preloads");
 	let preloadFileArray = fs.readdirSync(preloadsDir);
