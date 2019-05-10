@@ -256,9 +256,6 @@ case 42:
 						break;
 					}
 				}
-
-				//console.log("got cast:");
-				//console.log(`${t}:`);
 				return `scope.id.${t}`;
 			}());
 		
@@ -467,8 +464,6 @@ yy.scope.setAsync();
 break;
 case 109:
 
-			//console.log("scopeDecl:");
-			//console.log($$[$0-2]);
 			this.$ = {
 				name: $$[$0-2].name,
 				expr: 
@@ -485,8 +480,6 @@ case 109:
 break;
 case 110:
 
-			//console.log("scopeDecl:");
-			//console.log($$[$0-2]);
 			this.$ = {
 				name: $$[$0-2].name,
 				expr: $$[$0-2].expr + 
@@ -733,7 +726,6 @@ case 146:
 			this.$ = (function () {
 				let parent = yy.scope;
 				yy.scope.begin();
-				//console.log($$[$0-2], yy.scope.expressions);
 				return new yy.xml.Tag($$[$0-2], $$[$0-1]);
 			}());
 		
@@ -757,12 +749,8 @@ case 152:
 
 			yy.lexer._more = true;
 			this.$ = (function () {
-				console.log("script dir:", yy.script_dir);
 				let f = path.join(yy.script_dir,$$[$0].substr(1,$$[$0].length-2));
-				console.log("include:",f);
-				//console.log(yy.lexer);
 				let r = yy.parser.include(f);
-				//console.log(r);
 				return r;
 			}());
 		
@@ -1253,7 +1241,6 @@ performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
 	yy.setStr = function setStr(body, txt) {
 		return body + txt;
 	};
-	//console.log(this);
 
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
@@ -1261,7 +1248,6 @@ case 0:/* skip whitespace */
 break;
 case 1:
 												if (this.topState() === "declLeft") {
-													//console.log("\n\n\nEurika!\n\n\n");
 													this.popState();
 												}
 											 	yy.scope.beginParen();
@@ -1279,7 +1265,6 @@ case 3:this.popState();return 15;
 break;
 case 4:
 												if (this.topState() === "declLeft") {
-													//console.log("\n\n\nEurika!\n\n\n");
 													this.popState();
 												}
 												this.pushState('paren');
@@ -1395,7 +1380,6 @@ break;
 case 33:this.popState();return 7;
 break;
 case 34:
-												 //console.log("\n\n\nEXPR BRACKET FOUND\n\n\n");
                                                  for (let [search, result] of yy.namedTokens) {
                                                  	if (search.test(yy_.yytext)) {
                                                  		if (typeof result === "function") {
@@ -1436,8 +1420,6 @@ case 35:
 break;
 case 36:
 												if (this.topState() === "declLeft") {
-													//console.log("\n\n\nEurika!\n\n\n");
-													//console.log(this);
 													this.popState();
 												}
 												this.pushState("controlCode");
@@ -1510,10 +1492,6 @@ case 63:
                                                  }
                                                  if (!(/\-/).test(yy_.yytext)) {
                                                  	return "JSPROPERTY";
-                                                 }
-                                                 if (yy_.yytext === "id") {
-                                                 	//console.log(this);
-                                                 	process.exit();
                                                  }
                                                  return "PROPERTY";
                                              

@@ -49,6 +49,7 @@
     "xregexp": "^4.2.0"
   },
   "devDependencies": {
+    "browserify": "^16.2.3",
     "dateformat": "^3.0.3",
     "jison": "^0.4.18",
     "man-api": "^0.3.1",

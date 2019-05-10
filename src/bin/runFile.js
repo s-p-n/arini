@@ -59,9 +59,5 @@ if (typeof inputFile === "undefined") {
 			parser.eval();
 		}
 		debug(`finished.`);
-	}).catch(err => {
-		console.error("got error");
-		console.error(err);
-		process.exit(1);
-	});
+	}).catch(console.error);
 }

@@ -193,9 +193,6 @@ cast
 						break;
 					}
 				}
-
-				//console.log("got cast:");
-				//console.log(`${t}:`);
 				return `scope.id.${t}`;
 			}());
 		%}
@@ -488,8 +485,6 @@ scopeAsyncFlag
 scopeDecl
 	: scopeDeclStart codeBlock '}'
 		%{
-			//console.log("scopeDecl:");
-			//console.log($scopeDeclStart);
 			$$ = {
 				name: $scopeDeclStart.name,
 				expr: 
@@ -505,8 +500,6 @@ scopeDecl
 		%}
 	| scopeAsyncFlag scopeDeclStart codeBlock '}'
 		%{
-			//console.log("scopeDecl:");
-			//console.log($scopeDeclStart);
 			$$ = {
 				name: $scopeDeclStart.name,
 				expr: $scopeDeclStart.expr + 
@@ -809,7 +802,6 @@ tagBlockStart
 			$$ = (function () {
 				let parent = yy.scope;
 				yy.scope.begin();
-				//console.log($XML_OPEN_ID, yy.scope.expressions);
 				return new yy.xml.Tag($XML_OPEN_ID, $attributeList);
 			}());
 		}
@@ -833,12 +825,8 @@ unaryExpr
 		{
 			yy.lexer._more = true;
 			$$ = (function () {
-				console.log("script dir:", yy.script_dir);
 				let f = path.join(yy.script_dir,$string.substr(1,$string.length-2));
-				console.log("include:",f);
-				//console.log(yy.lexer);
 				let r = yy.parser.include(f);
-				//console.log(r);
 				return r;
 			}());
 		}

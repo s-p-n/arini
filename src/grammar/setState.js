@@ -52,7 +52,6 @@ function parseMacros(code) {
 	function getAttributesObj (attributes) {
 		let obj = Object.create(null);
 		attributes.replace(attrSearch, function (fullMatch, name, value) {
-			//console.log(value);
 			obj[name] = value.substr(1,value.length - 2);
 			return "";
 		});
@@ -75,7 +74,6 @@ function requireFromString(src, filename) {
 	const m = new Module(filename, parent);
 	m.filename = filename;
 	m.paths = Module._nodeModulePaths(path.dirname(filename));
-	//console.log(src);
 	m._compile(src, filename);
 	return m.exports;
 }
@@ -95,7 +93,6 @@ module.exports = function setState (parser, runtime={}) {
 		let processedArini = parser.yy.scope.toJS();
 		code += prefix + processedArini + suffix;
 		code = parseMacros(code);
-		//console.log(code);
 		return requireFromString(code, name);
 	}
 	parser.include = function (f) {
@@ -104,7 +101,6 @@ module.exports = function setState (parser, runtime={}) {
 		let p = new g(r);
 		let code = fs.readFileSync(f, "utf8");
 		p.yy.script_dir = path.dirname(f);
-		console.log("child script_dir:", p.yy.script_dir);
 		p.parse(`{${code}}();`);
 		return p.yy.scope.toJS();
 	}
@@ -113,7 +109,6 @@ module.exports = function setState (parser, runtime={}) {
 		let r = require('../runtime/runtime.js');
 		let p = new g(r);
 		let code = fs.readFileSync(f, "utf8");
-		//console.log(code);
 		p.parse(code);
 		return p.eval(f, "module.exports=scope.createScope(function(){this._scoping=scope._scoping;", "})()");
 	}
@@ -142,8 +137,8 @@ Token: ${hash.token}`);
 		if (hash.recoverable) {
 			console.log("Error is recoverable.");
 		} else {
-			console.log(this.pushState);
-			process.exit();
+			console.error(this.pushState);
+			//process.exit();
 		}
 	}
 }
