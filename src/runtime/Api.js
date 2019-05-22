@@ -3,22 +3,25 @@ const fs = require("fs");
 const path = require("path");
 const util = require("util");
 const child_process = require("child_process");
-const runFile = process.argv[1];
+const runFile = path.join(path.dirname(require.resolve('arini')), 'src/bin/runFile.js');
+console.log(runFile);
 const debug = (...args) => {
-	//return console.log(...args);
+	return console.log(...args);
 };
 async function getTranslation (file) {
 	const filename = path.isAbsolute(file) ? file : path.join(process.cwd(), file);
 	const n = child_process.fork(runFile, [filename, '--fork']);
+
 	n.on[util.promisify.custom] = function () {
+		let cwd = process.cwd();
+		console.log("cwd:", cwd);
 		return new Promise((resolve, reject) => {
 			let t = setTimeout(() => {
 				reject('timeout');
 			}, 10000);
 			debug(`Awaiting code for file: ${filename}`);
-			n.on('message',async (m) => {
+			n.on('message', async (m) => {
 				clearTimeout(t);
-				let cwd = process.cwd();
 				process.chdir(path.dirname(filename));
 				try {
 					let result;
@@ -36,6 +39,7 @@ async function getTranslation (file) {
 				}
 				process.chdir(cwd);
 			});
+			n.on('error', reject);
 		});
 	};
 	return await n.on[util.promisify.custom]();
@@ -78,6 +82,7 @@ class Api {
 
 	async compile (file) {
 		debug(file);
+		debug(process.cwd());
 		if (!fs.existsSync(file)) {
 			throw new Error(`compile error: File not found: '${file}'`);
 		}
@@ -94,7 +99,6 @@ class Api {
 		}
 		if (!stats.isFile()) {
 			throw new Error("Not a file..");
-			return false;
 		}
 		debug('found file');
 		

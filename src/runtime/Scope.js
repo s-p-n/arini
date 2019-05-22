@@ -548,25 +548,23 @@ class Scope extends Api {
 		const self = this;
 		let result;
 		let container;
-		if (self.getType(scope) !== "function") {
-			// this is bad- trying to use something that isn't a function is illogical.. should we error?
-			console.log("attempting to use non-function");
-			process.exit(1);
+		if (self.getType(scope) === "array") {
+			scope.map(v => self.use(v, as, only));
 			return;
+		}
+		if (self.getType(scope) !== "function") {
+			throw new Error("attempting to use non-function");
 		}
 		if (scope._isScope) {
 			scope._beingUsed = true;
 			result = scope(...args);
 		} else {
 			let properties = Object.getOwnPropertyDescriptors(scope.prototype);
-			//console.log(properties);
-			//console.log([...Object.entries(properties)]);
 			result = self.map([
 				["public", []],
 				["protected", []]
 			]);
 			Object.defineProperties(result.public, properties);
-			//console.log(result);
 		}
 		if (self.getType(as) === "undefined") {
 			container = self._scoping;
@@ -575,10 +573,25 @@ class Scope extends Api {
 			container = self.id[as];
 		}
 		if (self.getType(only) === "undefined") {
-			container.public = result.public;
-			container.protected = result.protected;
-			//self.shallowClone(container.public, result.public);
-			//self.shallowClone(container.protected, result.protected);
+			self.shallowClone(container.public, result.public);
+			self.shallowClone(container.protected, result.protected);
+
+			for (let propName in container.public) {
+				let prop = container.public[propName];
+				if (!prop._isScope) {
+					continue;
+				}
+				prop._parent.public = container.public;
+				prop._parent.protected = container.protected;
+			}
+			for (let propName in container.protected) {
+				let prop = container.protected[propName];
+				if (!prop._isScope) {
+					continue;
+				}
+				prop._parent.public = container.public;
+				prop._parent.protected = container.protected;
+			}
 		}
 	}
 

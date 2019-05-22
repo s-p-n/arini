@@ -1,7 +1,7 @@
 %{
-	const fs = require('fs');
+	//const fs = require('fs');
 	const path = require('path');
-	const arini_dir = path.dirname(path.dirname(process.argv[1]));
+	//const arini_dir = path.dirname(path.dirname(process.argv[1]));
 %}
 
 %left BECOMES XML_ATTR_BECOMES PLUS_BECOMES MINUS_BECOMES

@@ -84,7 +84,15 @@ module.exports = function setState (parser, runtime={}) {
 	for (let [,prep] of preloads) prep(parser);
 
 	parser.yy.script_dir = (process.argv[2] !== undefined) ? path.dirname(path.join(process.cwd(), process.argv[2])) : process.cwd();
-
+	parser.toNodeJS = function (
+			prefix="module.exports = (async function(){this._scoping=scope._scoping;", 
+			suffix="}());"
+		) {
+		let code = `[${Object.keys(runtime).join(',')}]=[${Object.values(runtime).join(',')}];`;
+		let processedArini = parser.yy.scope.toJS();
+		code += prefix + processedArini + suffix;
+		return parseMacros(code);
+	}
 	parser.eval = function (name="shell", 
 			prefix="module.exports = (async function(){this._scoping=scope._scoping;", 
 			suffix="}());"
